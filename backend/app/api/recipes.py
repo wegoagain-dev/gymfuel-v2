@@ -5,7 +5,7 @@ import google.generativeai as genai
 import json
 import logging
 
-from app.models.database import get_db, Recipe, User, Meal
+from app.models.database import get_db, Recipe, User, Meal, MealLog
 from app.schemas.schemas import RecipeCreate, RecipeUpdate, RecipeResponse
 from app.api.auth import get_current_user
 from app.core.config import settings
@@ -124,6 +124,9 @@ async def delete_recipe(
     
     # Clear recipe_id from meals that reference this recipe
     db.query(Meal).filter(Meal.recipe_id == recipe_id).update({"recipe_id": None})
+    db.query(MealLog).filter(MealLog.source_recipe_id == recipe_id).update(
+        {"source_recipe_id": None}
+    )
     db.commit()
     
     db.delete(db_recipe)

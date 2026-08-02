@@ -32,9 +32,10 @@ resource "aws_iam_role_policy" "ecs_secrets_policy" {
       Action = [
         "secretsmanager:GetSecretValue"
       ]
-      Resource = [
-        aws_secretsmanager_secret.ecs_db_string.arn
-      ]
+      Resource = compact([
+        aws_secretsmanager_secret.ecs_db_string.arn,
+        var.openai_api_key_secret_arn
+      ])
     }]
   })
 }

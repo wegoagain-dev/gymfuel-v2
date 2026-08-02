@@ -207,3 +207,22 @@ variable "ecs_memory" {
   type        = string
   default     = "512"
 }
+
+variable "openai_api_key_secret_arn" {
+  description = "Optional ARN of an existing Secrets Manager secret containing the OpenAI API key"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "openai_meal_analysis_model" {
+  description = "OpenAI model used for transient GymFuel Lens meal-photo analysis"
+  type        = string
+  default     = "gpt-5.6-terra"
+}
+
+variable "openai_recipe_model" {
+  description = "OpenAI model used for GymFuel Lens pantry recipe generation"
+  type        = string
+  default     = "gpt-5.6-luna"
+}

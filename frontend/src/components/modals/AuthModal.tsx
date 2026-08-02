@@ -112,7 +112,7 @@ export function AuthModal() {
                                 <Dumbbell className="h-3.5 w-3.5" />
                                 Welcome to GymFuel
                             </div>
-                            <p className="text-2xl font-semibold text-white leading-tight">Plan meals, hit protein, stay consistent.</p>
+                            <p className="text-2xl font-semibold text-white leading-tight">Log meals, hit protein, use your groceries.</p>
                         </div>
                         </div>
                     </div>

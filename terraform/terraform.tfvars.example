@@ -14,3 +14,8 @@ db_instance_class = "db.t3.micro"
 # Resources
 ecs_cpu    = "256"
 ecs_memory = "512"
+
+# GymFuel Lens (create this secret manually; do not put the API key in tfvars)
+openai_api_key_secret_arn = ""
+openai_meal_analysis_model = "gpt-5.6-terra"
+openai_recipe_model        = "gpt-5.6-luna"

@@ -95,10 +95,12 @@ resource "aws_ecs_task_definition" "backend" {
       environment = [
         #  CORS origin so the frontend can talk to backend my domain only
         { name = "ALLOWED_ORIGINS", value = "https://${var.domain_name},https://www.${var.domain_name}" },
-        { name = "SECRET_KEY", value = random_password.backend_secret_key.result }
+        { name = "SECRET_KEY", value = random_password.backend_secret_key.result },
+        { name = "OPENAI_MEAL_ANALYSIS_MODEL", value = var.openai_meal_analysis_model },
+        { name = "OPENAI_RECIPE_MODEL", value = var.openai_recipe_model }
       ]
       # Secrets (Injected securely from Secrets Manager)
-      secrets = [
+      secrets = concat([
         { # Local (Docker Compose)
           # postgresql://postgres:postgres@postgres:5432/gymfuel
           # AWS (Terraform)
@@ -106,7 +108,12 @@ resource "aws_ecs_task_definition" "backend" {
           name      = "DATABASE_URL"
           valueFrom = aws_secretsmanager_secret.ecs_db_string.arn
         }
-      ]
+        ], var.openai_api_key_secret_arn != "" ? [
+        {
+          name      = "OPENAI_API_KEY"
+          valueFrom = var.openai_api_key_secret_arn
+        }
+      ] : [])
     }
   ])
 }

@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, coach, groceries, meals, recipes, websocket
+from app.api import auth, coach, groceries, meal_logs, meals, pantry, recipes, websocket
 
 app = FastAPI(
     title="GymFuel API",
@@ -42,6 +42,8 @@ app.include_router(recipes.router, prefix="/api/recipes", tags=["recipes"])
 app.include_router(meals.router, prefix="/api/meals", tags=["meals"])
 app.include_router(groceries.router, prefix="/api/groceries", tags=["groceries"])
 app.include_router(coach.router, prefix="/api/coach", tags=["coach"])
+app.include_router(meal_logs.router, prefix="/api/meal-logs", tags=["meal-logs"])
+app.include_router(pantry.router, prefix="/api/pantry", tags=["pantry"])
 app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 
