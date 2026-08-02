@@ -1,21 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import Image from "next/image"
+import { startTransition, useDeferredValue, useState, useEffect, type ChangeEvent, type ReactNode } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ChefHat, Calendar, ShoppingBag, Plus, Search, Trash2, LogOut, User, Sparkles, Shuffle, Flame, Pencil, Dumbbell, X, Users, Mail, KeyRound } from "lucide-react"
+import { ChefHat, ShoppingBag, Plus, Search, Trash2, LogOut, User, Flame, Pencil, Dumbbell, Users, Mail, KeyRound, ScanLine, History, PackageOpen, Target } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { GroceryItem, Recipe } from "@/lib/types"
 import { AddRecipeModal } from "@/components/modals/AddRecipeModal"
 import { AddGroceryItemModal } from "@/components/modals/AddGroceryItemModal"
-import { EditMealDialog } from "../components/modals/EditMealDialog"
-
-
 import { AuthModal } from "@/components/modals/AuthModal"
-import { GenerateRecipeModal } from "@/components/modals/GenerateRecipeModal"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,226 +23,226 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AddToMealPlanModal } from "@/components/modals/AddToMealPlanModal"
 import { CoachDashboard } from "@/components/CoachDashboard"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { MealHistoryPanel, NutritionTargetsDialog, PantryPanel, TodayPanel } from "@/components/LensWorkspace"
 
+const LANDING_PANTRY_PREVIEW = [
+  { name: "Chicken breast", status: "Have", tone: "emerald" },
+  { name: "Rice + spinach", status: "Have", tone: "emerald" },
+  { name: "Greek yogurt", status: "Extra", tone: "amber" },
+] as const
+const LANDING_TODAY_PREVIEW = [
+  { time: "08:20", title: "Overnight oats", note: "520 kcal · 34g protein" },
+  { time: "13:10", title: "Chicken rice bowl", note: "690 kcal · 56g protein" },
+  { time: "19:30", title: "Salmon grain bowl", note: "Draft ready to review" },
+] as const
 function LandingPage({ onSignIn }: { onSignIn: () => void }) {
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12 md:py-16">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center mb-12 md:mb-14"
-      >
+    <section aria-label="GymFuel overview" className="relative left-1/2 right-1/2 ml-[-50vw] mr-[-50vw] w-screen overflow-hidden px-4 py-8 md:px-8 md:py-12">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/15 border border-blue-300/25 mb-8 text-white/90"
-        >
-          <Dumbbell className="h-4 w-4 text-blue-200" />
-          <span className="text-sm font-medium uppercase tracking-wider">Coach-Led Nutrition</span>
-        </motion.div>
-
-        <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-[0.95]">
-          Plan Protein.
-          <br />
-          <span className="text-blue-300">Keep Clients Consistent.</span>
-        </h2>
-        <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10">
-          Weekly meal planning, grocery prep, and accountability for coaches and clients who care about adherence.
-        </p>
-        <Button
-          size="lg"
-          onClick={onSignIn}
-          className="rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-base md:text-lg px-8 md:px-12 py-6 md:py-7 font-semibold shadow-xl shadow-blue-900/50 border border-blue-300/20"
-        >
-          Start Planning
-        </Button>
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-phone"
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 mx-auto flex w-full max-w-xl flex-col items-start justify-center"
         >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white text-base font-medium">Client Dashboard</p>
-                <p className="text-white/50 text-xs">Coach-linked account</p>
-              </div>
-              <div className="h-10 w-10 rounded-full bg-blue-500/30 border border-blue-200/25 flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-            </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.05 }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-white/90"
+          >
+            <Dumbbell className="h-4 w-4 text-white/70" />
+            <span className="text-sm font-medium uppercase tracking-wider">Daily Nutrition, Made Practical</span>
+          </motion.div>
 
-            <div className="pt-2">
-              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">Account & Check-ins</p>
-              <button className="w-full rounded-2xl bg-gradient-to-r from-blue-600/90 to-blue-500/80 border border-blue-300/25 p-3 flex items-center justify-between text-left">
-                <span className="text-white font-medium">Weekly Check-In</span>
-                <span className="text-white/70">›</span>
-              </button>
-              <div className="mt-2 space-y-2">
-                <div className="frost-item">
-                  <span className="text-white/80">Coach Notes</span>
-                  <span className="rounded-full bg-blue-600 text-white text-[10px] px-2 py-0.5">3</span>
-                </div>
-                <div className="frost-item">
-                  <span className="text-white/80">Nutrition Goals</span>
-                  <span className="text-white/35">›</span>
-                </div>
-                <div className="frost-item">
-                  <span className="text-white/80">Privacy</span>
-                  <span className="text-white/35">›</span>
-                </div>
-              </div>
-            </div>
+          <h2 className="editorial-heading max-w-[10ch] text-5xl font-bold leading-[0.9] tracking-tight text-white md:text-7xl">
+            See Your Meal.
+            <span className="mt-2 block text-blue-300">Shape Your Next One.</span>
+          </h2>
+          <p className="mt-6 max-w-md text-base leading-7 text-white/68 md:text-lg">
+            Photograph meals, confirm estimated macros, and turn your groceries into gym-focused recipes.
+          </p>
 
-            <div className="pt-2 border-t border-white/10">
-              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-2">Focus</p>
-              <div className="frost-item">
-                <span className="text-white/90">Focus Mode</span>
-                <span className="inline-flex h-6 w-11 rounded-full bg-blue-500/30 p-1 border border-blue-300/20">
-                  <span className="h-4 w-4 rounded-full bg-blue-400 ml-auto" />
-                </span>
-              </div>
-            </div>
+          <div className="mt-8">
+            <Button
+              size="lg"
+              onClick={onSignIn}
+              className="glass-button rounded-2xl px-8 py-6 text-base md:text-lg"
+            >
+              Open GymFuel
+            </Button>
           </div>
+
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.28 }}
-          className="glass-phone"
+          transition={{ delay: 0.12, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="grid gap-4 lg:grid-rows-[minmax(0,1.12fr)_minmax(0,0.88fr)]"
         >
-          <div className="space-y-5">
-            <div className="rounded-full h-12 px-4 border border-white/10 bg-white/5 flex items-center gap-3">
-              <Search className="h-4 w-4 text-white/50" />
-              <span className="text-white/50">Search meals...</span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2">
-              {["Breakfast", "Lunch", "Dinner", "Snacks"].map((label, index) => (
-                <div key={label} className="flex flex-col items-center gap-1.5">
-                  <div className={index === 1 ? "category-dot category-dot-active" : "category-dot"}>
-                    <ChefHat className="h-4 w-4" />
+          <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#12161f]">
+              <div className="relative min-h-[520px]">
+                <Image
+                  src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=60"
+                  alt="High-protein salmon and grain bowl"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 36vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-[#0b0d12]/36 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Lens draft · estimate</p>
+                  <h3 className="editorial-heading mt-3 max-w-[14ch] text-3xl text-white md:text-4xl">
+                    Review the meal before it counts.
+                  </h3>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/80">
+                    <span className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 backdrop-blur-md">640 kcal</span>
+                    <span className="rounded-full border border-emerald-200/20 bg-emerald-950/35 px-3 py-1.5 text-emerald-100 backdrop-blur-md">42g protein</span>
                   </div>
-                  <span className="text-[10px] text-white/70">{label}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className="rounded-3xl overflow-hidden border border-white/10 bg-white/5">
-              <img
-                src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=900&auto=format&fit=crop&q=60"
-                alt="High protein meal"
-                className="w-full aspect-[16/10] object-cover"
-              />
-              <div className="px-4 py-3.5">
-                <p className="text-white font-medium">High-Protein Chicken Bowl</p>
-                <p className="text-white/60 text-xs">48g protein • 620 kcal • Meal prep friendly.</p>
               </div>
-            </div>
           </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.36 }}
-          className="glass-phone"
-        >
-          <div className="space-y-5">
-            <div>
-              <p className="text-white text-base font-semibold">Prep & Grocery Log</p>
-              <p className="text-white/50 text-xs">Built from your weekly meal plan</p>
+          <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-[2rem] border border-white/10 bg-[#12161f] p-5 md:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Today timeline</p>
+                  <p className="mt-2 text-lg font-medium text-white">What you ate, in one glance</p>
+                </div>
+                <div className="hidden h-10 min-w-[9rem] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-white/45 sm:flex">
+                  <Search className="h-4 w-4" />
+                  <span className="text-sm">Search history…</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3">
+                {LANDING_TODAY_PREVIEW.map((item) => (
+                  <div key={item.time} className="grid gap-2 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4 sm:grid-cols-[120px_1fr] sm:items-center">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-blue-200/70">{item.time}</p>
+                    <div>
+                      <p className="text-sm font-medium text-white">{item.title}</p>
+                      <p className="mt-1 text-xs text-white/50">{item.note}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {[
-              { name: "Chicken Breast", qty: "2 kg", status: "Fresh", tone: "emerald" },
-              { name: "Greek Yogurt", qty: "6 cups", status: "Soon", tone: "amber" },
-              { name: "Spinach", qty: "1 bag", status: "Urgent", tone: "rose" },
-            ].map((item) => (
-              <div key={item.name} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between">
+            <div className="rounded-[2rem] border border-white/10 bg-[#12161f] p-5 md:p-6">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-white text-sm">{item.name}</p>
-                  <p className="text-white/50 text-xs">{item.qty}</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Groceries</p>
+                  <p className="mt-2 text-lg font-medium text-white">Use what you already have</p>
                 </div>
-                <Badge
-                  className={
-                    item.tone === "emerald"
-                      ? "bg-emerald-500 text-white border-0"
-                      : item.tone === "amber"
-                        ? "bg-amber-500 text-black border-0"
-                        : "bg-rose-500 text-white border-0"
-                  }
-                >
-                  {item.status}
-                </Badge>
+                <div className="flex size-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/70">
+                  <PackageOpen className="h-4 w-4" />
+                </div>
               </div>
-            ))}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-              <button className="rounded-xl min-h-12 px-4 border border-white/10 bg-white/5 text-white/85 text-sm flex items-center justify-center gap-2.5">
-                <ChefHat className="h-4 w-4" />
-                Recipes
-              </button>
-              <button className="rounded-xl min-h-12 px-4 border border-blue-300/25 bg-blue-600/65 text-white text-sm flex items-center justify-center gap-2.5">
-                <ShoppingBag className="h-4 w-4" />
-                Grocery Log
-              </button>
+              <div className="mt-6 flex flex-col gap-3">
+                {LANDING_PANTRY_PREVIEW.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4">
+                    <div>
+                      <p className="text-sm text-white">{item.name}</p>
+                    </div>
+                    <Badge
+                      className={
+                        item.tone === "emerald"
+                          ? "bg-emerald-500 text-white border-0"
+                          : "bg-amber-500 text-black border-0"
+                      }
+                    >
+                      {item.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Generated result</p>
+                <p className="mt-2 text-sm leading-6 text-white/72">
+                  3 groceries-first recipes · up to 3 extras each
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>
       </div>
-    </div>
+
+      <div className="mx-auto mt-14 flex max-w-7xl flex-col gap-14 pb-10">
+        <section className="rounded-[2.5rem] border border-white/10 bg-[#11161e] p-7 shadow-[0_24px_80px_rgba(2,6,23,0.24)] md:p-10">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <h4 className="editorial-heading text-3xl font-semibold text-white md:text-4xl">Start with your next meal.</h4>
+            </div>
+            <Button
+              size="lg"
+              onClick={onSignIn}
+              className="rounded-2xl bg-white px-7 py-6 text-sm font-semibold text-slate-950 shadow-none hover:bg-blue-50 md:text-base"
+            >
+              Open GymFuel
+            </Button>
+          </div>
+        </section>
+      </div>
+    </section>
+  )
+}
+
+function EmptyStateCard({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon: ReactNode
+  title: string
+  description: string
+  action?: ReactNode
+}) {
+  return (
+    <Card className="border-dashed border-white/20 bg-white/5 py-0">
+      <CardHeader className="items-center justify-items-center px-6 py-10 text-center">
+        <div className="mb-2 flex size-20 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+          {icon}
+        </div>
+        <CardTitle className="text-xl text-foreground">{title}</CardTitle>
+        <CardDescription className="max-w-md text-sm">{description}</CardDescription>
+      </CardHeader>
+      {action ? <CardContent className="pb-10 text-center">{action}</CardContent> : null}
+    </Card>
   )
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("recipes")
+  const [activeTab, setActiveTab] = useState("today")
   const [searchQuery, setSearchQuery] = useState("")
-  const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? "Good morning," : hour < 18 ? "Good afternoon," : "Good evening,"
+  const deferredSearchQuery = useDeferredValue(searchQuery)
   const [isSignOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
+  const [isTargetsOpen, setTargetsOpen] = useState(false)
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null)
   const [groceryToDelete, setGroceryToDelete] = useState<GroceryItem | null>(null)
-  const [selectedPlanDay, setSelectedPlanDay] = useState(() => {
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    return dayNames[new Date().getDay()]
-  })
+  const [groceriesView, setGroceriesView] = useState<"ingredients" | "shopping">("ingredients")
 
   const {
     user,
     isAuthenticated,
     recipes,
-    meals,
     groceryItems,
     loadData,
     loadUser,
     logout,
     setAuthModalOpen,
     setAddRecipeModalOpen,
-    setGenerateAIModalOpen,
-    setAddToMealPlanModalOpen,
-    setSelectedRecipeForPlan,
     deleteRecipe,
     deleteGroceryItem,
-    deleteMeal,
-    addMeal,
     setItemToEdit,
     setAddGroceryModalOpen,
-    mealToEdit,
-    isEditMealModalOpen,
-    setMealToEdit,
-    setEditMealModalOpen
   } = useStore()
 
   // Load user and data on mount
@@ -258,9 +257,9 @@ export default function Home() {
 
   // Filter recipes based on search query
   const filteredRecipes = recipes.filter(recipe =>
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    recipe.title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+    recipe.description.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+    recipe.tags.some(tag => tag.toLowerCase().includes(deferredSearchQuery.toLowerCase()))
   )
 
   // Calculate expiration status for grocery items
@@ -301,7 +300,7 @@ export default function Home() {
     setAddRecipeModalOpen(true)
   }
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
   }
 
@@ -330,14 +329,6 @@ export default function Home() {
     }
   }
 
-  const handleDeletePlannedMeal = async (mealId: string) => {
-    try {
-      await deleteMeal(mealId)
-    } catch (error) {
-      console.error("Failed to delete planned meal:", error)
-    }
-  }
-
   const grocerySummary = groceryItems.reduce(
     (acc, item) => {
       const expStatus = getExpirationStatus(item.expirationDate)
@@ -349,27 +340,30 @@ export default function Home() {
     },
     { urgent: 0, soon: 0, fresh: 0, noExpiry: 0 }
   )
+  const urgentGroceryCount = grocerySummary.urgent
 
   return (
     <div className="dark min-h-screen bg-[#0f1220] text-foreground transition-colors duration-300">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-[#171a2b] to-slate-900" />
-        <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[620px] h-[620px] bg-violet-600/20 rounded-full blur-[120px]" />
-        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-[420px] h-[420px] bg-pink-500/10 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#090b10] via-[#0f131a] to-[#090b10]" />
+        <div className="absolute top-[-10%] left-[10%] h-[420px] w-[420px] rounded-full bg-[#c8b48c]/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[8%] h-[520px] w-[520px] rounded-full bg-[#8fa3bf]/10 blur-[120px]" />
       </div>
 
       <nav className="sticky top-0 z-50 pt-3">
         <div className="container mx-auto max-w-6xl px-4">
-          <div className="flex items-center justify-between h-14 rounded-2xl border border-white/15 bg-[#11182a]/70 px-4 md:px-5 backdrop-blur-xl shadow-[0_12px_32px_rgba(2,6,23,0.45)]">
+          <div className="flex items-center justify-between h-14 rounded-2xl border border-white/10 bg-[#10141b]/88 px-4 md:px-5 backdrop-blur-xl shadow-[0_12px_32px_rgba(2,6,23,0.26)]">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-500 rounded-lg p-1.5">
-                <Dumbbell className="h-5 w-5 text-black" />
+              <div className="rounded-xl border border-blue-300/20 bg-blue-500/18 p-2">
+                <Dumbbell className="h-4 w-4 text-blue-100" />
               </div>
               <h1 className="text-lg font-bold tracking-tight text-white">GymFuel</h1>
               {isAuthenticated && (
                 <span className="hidden sm:inline-flex text-[10px] uppercase tracking-wider px-2 py-1 rounded-full border border-white/20 bg-white/10 text-white/80">
-                  Dashboard
+                  Lens
                 </span>
               )}
             </div>
@@ -387,7 +381,7 @@ export default function Home() {
                         <span className="text-xs font-medium max-w-24 truncate">{user?.username}</span>
                         <span className="text-[10px] text-emerald-300/80 flex items-center gap-1 mt-0.5">
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                          Saved
+                          Signed in
                         </span>
                       </span>
                     </Button>
@@ -407,14 +401,14 @@ export default function Home() {
                           </span>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-white truncate">{user?.username}</p>
-                            <p className="text-[11px] text-slate-300 truncate">{user?.full_name || "GymFuel Member"}</p>
+                            <p className="text-[11px] text-slate-300 truncate">{user?.full_name || "GymFuel member"}</p>
                           </div>
                         </div>
 
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-3 flex flex-col gap-2">
                           <div className="flex items-center gap-2 text-xs text-emerald-200">
                             <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]" />
-                            <span>Cloud Backup Enabled</span>
+                            <span>Signed in on this device</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-slate-300">
                             <Mail className="h-3.5 w-3.5 text-slate-400" />
@@ -430,6 +424,14 @@ export default function Home() {
                         </div>
                       </div>
                     </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onSelect={() => setTargetsOpen(true)}
+                      className="text-slate-200 focus:bg-white/8 focus:text-white"
+                    >
+                      <Target className="mr-2 h-4 w-4" />
+                      Profile & targets
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onSelect={(e) => {
@@ -453,7 +455,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 pb-28 md:pb-20 relative max-w-6xl pt-8">
+      <main id="main-content" className="relative container mx-auto max-w-6xl px-4 pb-28 pt-8 md:pb-20">
         {!isAuthenticated ? (
           <LandingPage onSignIn={handleSignIn} />
         ) : (
@@ -461,62 +463,32 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="space-y-8 mobile-app-shell"
+            className="mobile-app-shell flex flex-col gap-8"
           >
-            <div className="glass-card overflow-hidden rounded-3xl border border-white/15">
-              <div className="p-6 md:p-8 space-y-6">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{greeting}</p>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-                      {user?.username || "Athlete"}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">Keep your nutrition locked in this week.</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">Recipes</p>
-                      <div className="mt-2 flex items-end justify-between">
-                        <span className="text-2xl font-bold font-mono text-foreground">{recipes.length}</span>
-                        <ChefHat className="h-5 w-5 text-blue-300" />
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">Groceries</p>
-                      <div className="mt-2 flex items-end justify-between">
-                        <span className="text-2xl font-bold font-mono text-foreground">{groceryItems.length}</span>
-                        <ShoppingBag className="h-5 w-5 text-cyan-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2.5">
-                    <Button onClick={handleAddRecipe} className="glass-button rounded-xl">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Meal
-                    </Button>
-                    <Button variant="outline" onClick={handleAddGroceryItem} className="rounded-xl border-white/20 bg-white/5">
-                      <ShoppingBag className="h-4 w-4 mr-1.5" />
-                      Add Grocery
-                    </Button>
-                  </div>
-              </div>
-            </div>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 md:space-y-8">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => {
+                startTransition(() => setActiveTab(value))
+              }}
+              className="flex flex-col gap-6 md:gap-8"
+            >
               <div className="hidden md:flex py-2">
                 <TabsList className="h-auto w-auto inline-flex gap-1.5">
+                  <TabsTrigger value="today" className="px-5 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
+                    <ScanLine className="h-4 w-4" />
+                    Today
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="px-5 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
+                    <History className="h-4 w-4" />
+                    My Meals
+                  </TabsTrigger>
+                  <TabsTrigger value="groceries" className="px-5 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
+                    <PackageOpen className="h-4 w-4" />
+                    Groceries
+                  </TabsTrigger>
                   <TabsTrigger value="recipes" className="px-6 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
                     <ChefHat className="h-4 w-4" />
-                    Meals
-                  </TabsTrigger>
-                  <TabsTrigger value="meals" className="px-6 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
-                    <Calendar className="h-4 w-4" />
-                    Plan
-                  </TabsTrigger>
-                  <TabsTrigger value="groceries" className="px-6 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
-                    <ShoppingBag className="h-4 w-4" />
-                    Groceries
+                    Recipes
                   </TabsTrigger>
                   {user?.role === 'coach' && (
                     <TabsTrigger value="coach" className="px-6 py-2 whitespace-nowrap font-medium text-sm min-h-10 md:flex-none">
@@ -530,19 +502,23 @@ export default function Home() {
               <div className="fixed inset-x-3 bottom-3 z-40 md:hidden">
                 <div className="mobile-dock p-1.5">
                   <TabsList
-                    className={`w-full h-auto grid ${user?.role === "coach" ? "grid-cols-4" : "grid-cols-3"} gap-1 rounded-xl border-none bg-transparent p-0`}
+                    className={`w-full h-auto grid ${user?.role === "coach" ? "grid-cols-5" : "grid-cols-4"} gap-1 rounded-xl border-none bg-transparent p-0`}
                   >
-                    <TabsTrigger value="recipes" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
-                      <ChefHat className="h-4 w-4" />
+                    <TabsTrigger value="today" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
+                      <ScanLine className="h-4 w-4" />
+                      <span className="leading-none">Today</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="history" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
+                      <History className="h-4 w-4" />
                       <span className="leading-none">Meals</span>
                     </TabsTrigger>
-                    <TabsTrigger value="meals" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
-                      <Calendar className="h-4 w-4" />
-                      <span className="leading-none">Plan</span>
-                    </TabsTrigger>
                     <TabsTrigger value="groceries" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
-                      <ShoppingBag className="h-4 w-4" />
+                      <PackageOpen className="h-4 w-4" />
                       <span className="leading-none">Groceries</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="recipes" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
+                      <ChefHat className="h-4 w-4" />
+                      <span className="leading-none">Recipes</span>
                     </TabsTrigger>
                     {user?.role === 'coach' && (
                       <TabsTrigger value="coach" className="mobile-dock-trigger min-h-[58px] flex-col gap-1 px-1 py-2 text-[11px] font-medium">
@@ -555,14 +531,24 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Overview Tab Removed for Minimalism */}
+              <TabsContent value="today">
+                <TodayPanel
+                  onEditTargets={() => setTargetsOpen(true)}
+                />
+              </TabsContent>
 
-              <TabsContent value="recipes" className="space-y-6">
+              <TabsContent value="history">
+                <MealHistoryPanel />
+              </TabsContent>
+
+              <TabsContent value="recipes" className="flex flex-col gap-6">
+                <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">Recipes</h2>
                 <div className="glass-card rounded-2xl p-3 md:p-4 flex flex-col sm:flex-row gap-3 border-white/20">
                   <div className="flex-1 min-w-[200px] relative group">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-300 transition-colors" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-white/70 transition-colors" />
                     <Input
-                      placeholder="Search recipes..."
+                      aria-label="Search recipes"
+                      placeholder="Search recipes…"
                       className="pl-10 bg-white/5 border-white/15 focus:border-blue-400 text-foreground placeholder:text-muted-foreground transition-all rounded-xl min-h-11"
                       value={searchQuery}
                       onChange={handleSearchChange}
@@ -570,53 +556,23 @@ export default function Home() {
                   </div>
                   <Button onClick={handleAddRecipe} className="shrink-0 glass-button rounded-xl border-none min-h-11">
                     <Plus className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Add Meal</span>
+                    <span className="hidden sm:inline">Add Recipe</span>
                     <span className="sm:hidden">Add</span>
                   </Button>
-                  {isAuthenticated && (
-                    <Button variant="secondary" onClick={() => setGenerateAIModalOpen(true)} className="shrink-0 bg-white/5 hover:bg-white/10 border border-white/15 text-foreground rounded-xl min-h-11">
-                      <Sparkles className="h-4 w-4 sm:mr-2 text-cyan-500" />
-                      <span className="hidden sm:inline">AI Generate</span>
-                    </Button>
-                  )}
-                </div>
-
-                <div className="glass-card overflow-hidden rounded-2xl border-white/20">
-                  <div className="grid md:grid-cols-[1.15fr_0.85fr]">
-                    <div className="p-5 md:p-6 space-y-2.5">
-                      <p className="text-xs uppercase tracking-wider text-blue-200/80">Meal Library</p>
-                      <h3 className="text-xl md:text-2xl font-semibold text-white">Build your high-protein rotation.</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Save your go-to meals and quickly drop them into your weekly plan.
-                      </p>
-                    </div>
-                    <div className="image-surface relative min-h-[210px] md:min-h-[190px] m-3 md:m-4">
-                      <img
-                        src="https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=1200&auto=format&fit=crop&q=60"
-                        alt="Meal prep containers"
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0f1220]/65 via-transparent to-transparent" />
-                    </div>
-                  </div>
                 </div>
 
                 {filteredRecipes.length === 0 ? (
-                  <div className="glass-card p-12 text-center rounded-xl border-dashed">
-                    <div className="bg-white/5 w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-6">
-                      <ChefHat className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-foreground">No recipes yet</h3>
-                    <p className="text-muted-foreground mb-6">
-                      {searchQuery ? 'No recipes match your search.' : 'Start by adding your first high-protein meal!'}
-                    </p>
-                    {!searchQuery && (
+                  <EmptyStateCard
+                    icon={<ChefHat className="h-10 w-10 text-muted-foreground" />}
+                    title="No recipes yet"
+                    description={searchQuery ? "No recipes match your search." : "Start by adding a meal you use often."}
+                    action={!searchQuery ? (
                       <Button onClick={handleAddRecipe} className="glass-button rounded-lg">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Recipe
                       </Button>
-                    )}
-                  </div>
+                    ) : undefined}
+                  />
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {filteredRecipes.map((recipe, index) => (
@@ -626,13 +582,16 @@ export default function Home() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                       >
-                        <div className="glass-card overflow-hidden hover:border-blue-300/35 transition-all cursor-pointer group relative rounded-xl h-full flex flex-col">
+                        <div className="glass-card overflow-hidden hover:border-white/18 transition-all cursor-pointer group relative rounded-xl h-full flex flex-col">
                           <div className="image-surface h-40 md:h-32 bg-gradient-to-br from-blue-500/15 to-cyan-500/10 relative overflow-hidden rounded-none border-x-0 border-t-0 border-b border-white/12">
                             {recipe.imageUrl ? (
-                              <img
+                              <Image
                                 src={recipe.imageUrl}
                                 alt={recipe.title}
-                                className="w-full h-full object-cover"
+                                width={800}
+                                height={600}
+                                loading="lazy"
+                                className="h-full w-full object-cover"
                               />
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -658,15 +617,15 @@ export default function Home() {
                             <Trash2 className="h-4 w-4" />
                           </Button>
 
-                          <div className="p-5 flex-1 flex flex-col">
+                          <div className="flex flex-1 flex-col p-5">
                             <div className="mb-4">
                               <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">{recipe.title}</h3>
                               <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5em]">
-                                {recipe.description || 'No description provided.'}
+                                {recipe.description || "No description yet."}
                               </p>
                             </div>
 
-                            <div className="mt-auto space-y-4">
+                            <div className="mt-auto flex flex-col gap-4">
                               <div className="flex items-center gap-3 text-sm">
                                 <div className="flex items-center gap-1.5 font-mono font-semibold text-blue-300 bg-blue-500/15 px-2.5 py-1 rounded-md">
                                   <Dumbbell className="h-3.5 w-3.5" />
@@ -680,19 +639,6 @@ export default function Home() {
                                 )}
                               </div>
 
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full rounded-lg border-white/15 bg-white/5 hover:bg-white/5 hover:border-blue-300/35 text-foreground transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedRecipeForPlan(recipe)
-                                  setAddToMealPlanModalOpen(true)
-                                }}
-                              >
-                                <Calendar className="h-4 w-4 mr-2" />
-                                Add to Plan
-                              </Button>
                             </div>
                           </div>
                         </div>
@@ -702,246 +648,40 @@ export default function Home() {
                 )}
               </TabsContent>
 
-              <TabsContent value="meals" className="space-y-6">
-                <div className="flex flex-col space-y-2">
-                  <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-                    Weekly Fuel Plan
-                    <Badge className="bg-blue-500/20 border border-blue-300/35 text-blue-200">This Week</Badge>
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Plan your nutrition to hit your daily targets.</p>
-                </div>
-
-                {recipes.length === 0 && (
-                  <div className="rounded-2xl border border-amber-300/25 bg-amber-500/10 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <p className="text-sm text-amber-100">Add meals first so your weekly plan has options.</p>
-                    <Button size="sm" variant="outline" onClick={() => setActiveTab("recipes")} className="border-amber-200/30 bg-amber-500/10 text-amber-100 hover:bg-amber-500/20">
-                      Go to Meals
+              <TabsContent value="groceries" className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                  <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">Groceries</h2>
+                  <div className="grid grid-cols-2 gap-1 rounded-2xl border border-white/8 bg-white/[0.025] p-1">
+                    <Button size="sm" variant={groceriesView === "ingredients" ? "secondary" : "ghost"} className="rounded-xl" onClick={() => setGroceriesView("ingredients")}>
+                      <PackageOpen className="size-3.5" />Ingredients & AI
+                    </Button>
+                    <Button size="sm" variant={groceriesView === "shopping" ? "secondary" : "ghost"} className="rounded-xl" onClick={() => setGroceriesView("shopping")}>
+                      <ShoppingBag className="size-3.5" />Shopping list
                     </Button>
                   </div>
-                )}
-
-                <div className="md:hidden grid grid-cols-4 gap-2">
-                  {weekDays.map((day) => (
-                    <Button
-                      key={day}
-                      variant="ghost"
-                      className="mobile-day-chip text-xs px-2"
-                      data-active={selectedPlanDay === day ? "true" : "false"}
-                      onClick={() => setSelectedPlanDay(day)}
-                    >
-                      {day.slice(0, 3)}
-                    </Button>
-                  ))}
                 </div>
 
-                <div className="space-y-3">
-                  {weekDays.map((day) => {
-                    const getMealsForDay = (dayName: string, mealType: string) => {
-                      return meals.filter(meal => {
-                        const mealDate = new Date(meal.date)
-                        const dayOfWeek = mealDate.getDay()
-                        const dayIndex = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(dayName)
-                        return dayOfWeek === dayIndex && meal.mealType === mealType
-                      })
-                    }
-
-                    const handleRandomise = async (dayName: string, mealType: string) => {
-                      if (recipes.length === 0) {
-                        setActiveTab("recipes")
-                        return
-                      }
-                      const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)]
-
-                      // Calculate date for the day
-                      const today = new Date()
-                      const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-                      const currentDayIndex = today.getDay() || 7
-                      const targetDayIndexAdjusted = DAYS.indexOf(dayName) + 1
-                      let daysToAdd = targetDayIndexAdjusted - currentDayIndex
-                      if (daysToAdd < 0) daysToAdd += 7
-                      const targetDate = new Date(today)
-                      targetDate.setDate(today.getDate() + daysToAdd)
-
-                      const meal = {
-                        id: `meal-${Date.now()}`,
-                        date: targetDate.toISOString().split('T')[0],
-                        mealType: mealType as 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack',
-                        recipeId: randomRecipe.id,
-                        recipeName: randomRecipe.title,
-                        recipe: randomRecipe,
-                        notes: 'Randomly assigned',
-                        createdAt: new Date().toISOString(),
-                      }
-                      await addMeal(meal)
-                    }
-
-                    const dayMealsCount = ["Breakfast", "Lunch", "Dinner", "Snack"].reduce(
-                      (total, mealType) => total + getMealsForDay(day, mealType).length,
-                      0
-                    )
-
-                    return (
-                      <div
-                        key={day}
-                        className={`glass-card rounded-2xl p-4 md:p-5 border-white/20 ${day !== selectedPlanDay ? "hidden md:block" : ""}`}
-                      >
-                        <div className="mb-4 flex items-center justify-between">
-                          <div className="font-semibold text-blue-300 text-sm uppercase tracking-wider">{day}</div>
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">{dayMealsCount} planned</Badge>
-                        </div>
-                        <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                          {["Breakfast", "Lunch", "Dinner", "Snack"].map((mealType) => {
-                            const plannedMeals = getMealsForDay(day, mealType)
-                            return (
-                              <div key={mealType} className="bg-[#11182a]/75 rounded-xl p-3 text-sm border border-white/12 h-full flex flex-col">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{mealType}</span>
-                                  {plannedMeals.length === 0 && recipes.length > 0 && (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 md:h-6 md:w-6 hover:bg-white/10 text-muted-foreground hover:text-foreground rounded-md"
-                                      onClick={() => handleRandomise(day, mealType)}
-                                      title="Randomise"
-                                    >
-                                      <Shuffle className="h-3.5 w-3.5 md:h-3 md:w-3" />
-                                    </Button>
-                                  )}
-                                </div>
-                                {plannedMeals.length > 0 ? (
-                                  plannedMeals.length === 1 ? (
-                                    <div className="flex flex-col gap-1.5 mt-auto">
-                                      <div className="flex items-center justify-between gap-2">
-                                        <span className="text-foreground font-medium text-sm line-clamp-2 flex-1">
-                                          {plannedMeals[0].recipeName}
-                                        </span>
-                                        <div className="flex gap-0.5 shrink-0">
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 md:h-7 md:w-7 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md"
-                                            onClick={() => {
-                                              setMealToEdit(plannedMeals[0])
-                                              setEditMealModalOpen(true)
-                                            }}
-                                            title="Edit"
-                                            aria-label="Edit planned meal"
-                                          >
-                                            <Pencil className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 md:h-7 md:w-7 text-muted-foreground hover:text-destructive hover:bg-white/10 rounded-md"
-                                            onClick={() => {
-                                              void handleDeletePlannedMeal(plannedMeals[0].id)
-                                            }}
-                                            title="Remove"
-                                            aria-label="Remove planned meal"
-                                          >
-                                            <X className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                      {plannedMeals[0].recipe?.nutritionalInfo?.protein !== undefined && (
-                                        <div className="flex items-center gap-1 text-[10px] font-mono font-medium text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded w-fit">
-                                          <Dumbbell className="h-3 w-3" />
-                                          {plannedMeals[0].recipe.nutritionalInfo.protein}g
-                                        </div>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm" className="w-full justify-between bg-white/5 border-white/15 text-foreground hover:bg-white/10 h-8">
-                                          <span className="truncate">{plannedMeals[0].recipeName}</span>
-                                          <Badge variant="secondary" className="ml-1 bg-secondary text-secondary-foreground">{plannedMeals.length}</Badge>
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent className="w-56">
-                                        <DropdownMenuLabel>Planned Meals</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        {plannedMeals.map(meal => (
-                                          <DropdownMenuItem
-                                            key={meal.id}
-                                            onSelect={(e) => e.preventDefault()}
-                                            className="flex items-center justify-between"
-                                          >
-                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                              <span className="text-sm font-medium text-foreground truncate">
-                                                {meal.recipeName || 'Unknown Recipe'}
-                                              </span>
-                                              {meal.recipe?.nutritionalInfo?.protein !== undefined && (
-                                                <div className="flex items-center gap-1 text-[10px] font-mono text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                  <Dumbbell className="h-3 w-3" />
-                                                  {meal.recipe.nutritionalInfo.protein}g
-                                                </div>
-                                              )}
-                                            </div>
-                                            <div className="flex gap-1">
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 md:h-7 md:w-7 text-muted-foreground hover:text-foreground"
-                                                onClick={(e) => {
-                                                  e.stopPropagation()
-                                                  setMealToEdit(meal)
-                                                  setEditMealModalOpen(true)
-                                                }}
-                                                aria-label="Edit planned meal"
-                                              >
-                                                <Pencil className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                                              </Button>
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 md:h-7 md:w-7 text-muted-foreground hover:text-destructive hover:bg-white/10"
-                                                onClick={(e) => {
-                                                  e.stopPropagation()
-                                                  void handleDeletePlannedMeal(meal.id)
-                                                }}
-                                                aria-label="Remove planned meal"
-                                              >
-                                                <X className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                                              </Button>
-                                            </div>
-                                          </DropdownMenuItem>
-                                        ))}
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  )
-                                ) : (
-                                  <div className="text-muted-foreground/50 italic text-xs mt-auto">Empty</div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="groceries" className="space-y-6">
+                {groceriesView === "ingredients" ? (
+                  <PantryPanel showHeading={false} onEditPreferences={() => setTargetsOpen(true)} />
+                ) : (
+                  <>
                 <div className="flex flex-wrap justify-between items-center gap-3">
                   <div>
                     <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      My Groceries
+                      Shopping list
                       <Badge className="bg-cyan-500/20 border border-cyan-300/30 text-cyan-200">{groceryItems.length}</Badge>
                     </h3>
-                    <p className="text-sm text-muted-foreground">Track ingredients and expiration dates</p>
                   </div>
                   <div className="flex w-full sm:w-auto gap-2">
                     <Button onClick={handleAddGroceryItem} className="glass-button rounded-lg border-none flex-1 sm:flex-none">
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Item
+                      Add item
                     </Button>
                   </div>
                 </div>
 
                 {groceryItems.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                     <div className="rounded-xl border border-red-300/25 bg-red-500/10 px-3 py-2">
                       <p className="text-[10px] uppercase tracking-wider text-red-200/80">Urgent</p>
                       <p className="text-lg font-semibold text-red-100">{grocerySummary.urgent}</p>
@@ -961,20 +701,28 @@ export default function Home() {
                   </div>
                 )}
 
+                {urgentGroceryCount > 0 && (
+                  <Alert className="border-red-300/20 bg-red-500/10 text-red-100">
+                    <AlertDescription>
+                      {urgentGroceryCount} item{urgentGroceryCount === 1 ? "" : "s"} need using soon.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {groceryItems.length === 0 ? (
-                  <div className="glass-card p-12 text-center rounded-xl border-dashed">
-                    <div className="bg-white/5 w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-6">
-                      <ShoppingBag className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-foreground">No groceries yet</h3>
-                    <p className="text-muted-foreground mb-6">Start tracking your ingredients to reduce waste!</p>
-                    <Button onClick={handleAddGroceryItem} className="glass-button rounded-lg">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Item
-                    </Button>
-                  </div>
+                  <EmptyStateCard
+                    icon={<ShoppingBag className="h-10 w-10 text-muted-foreground" />}
+                    title="No groceries yet"
+                    description="Add anything you need to buy or use up."
+                    action={
+                      <Button onClick={handleAddGroceryItem} className="glass-button rounded-lg">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Item
+                      </Button>
+                    }
+                  />
                 ) : (
-                  <div className="space-y-2.5">
+                  <div className="flex flex-col gap-2.5">
                       {groceryItems.map((item) => {
                         const expStatus = getExpirationStatus(item.expirationDate)
                         return (
@@ -1034,6 +782,7 @@ export default function Home() {
                                   size="icon"
                                   className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-lg"
                                   onClick={() => handleEditGroceryItem(item)}
+                                  aria-label={`Edit ${item.name}`}
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </Button>
@@ -1042,6 +791,7 @@ export default function Home() {
                                   size="icon"
                                   className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-white/10 rounded-lg"
                                   onClick={() => setGroceryToDelete(item)}
+                                  aria-label={`Delete ${item.name}`}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -1051,6 +801,8 @@ export default function Home() {
                         )
                       })}
                   </div>
+                )}
+                  </>
                 )}
               </TabsContent>
 
@@ -1062,20 +814,14 @@ export default function Home() {
             </Tabs>
           </motion.div>
         )}
-      </div>
+      </main>
       {/* Modals */}
       <AuthModal />
       <AddRecipeModal />
-      <GenerateRecipeModal />
-      <AddToMealPlanModal />
       <AddGroceryItemModal />
-      <EditMealDialog
-        isOpen={isEditMealModalOpen}
-        onOpenChange={setEditMealModalOpen}
-        meal={mealToEdit}
-      />
+      <NutritionTargetsDialog open={isTargetsOpen} onOpenChange={setTargetsOpen} />
       <Dialog open={!!groceryToDelete} onOpenChange={(open) => !open && setGroceryToDelete(null)}>
-        <DialogContent className="max-w-sm border-white/15 bg-[#1a2133]/80">
+        <DialogContent className="max-w-sm border-white/10 bg-[#141922]/95">
           <DialogHeader>
             <DialogTitle>Delete Grocery Item?</DialogTitle>
             <DialogDescription>
@@ -1095,7 +841,7 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <Dialog open={!!recipeToDelete} onOpenChange={(open) => !open && setRecipeToDelete(null)}>
-        <DialogContent className="max-w-sm border-white/15 bg-[#1a2133]/80">
+        <DialogContent className="max-w-sm border-white/10 bg-[#141922]/95">
           <DialogHeader>
             <DialogTitle>Delete Recipe?</DialogTitle>
             <DialogDescription>
@@ -1115,9 +861,9 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <Dialog open={isSignOutConfirmOpen} onOpenChange={setSignOutConfirmOpen}>
-        <DialogContent className="max-w-sm border-white/15 bg-[#1a2133]/80">
+        <DialogContent className="max-w-sm border-white/10 bg-[#141922]/95">
           <DialogHeader>
-            <DialogTitle>Sign Out?</DialogTitle>
+            <DialogTitle>Sign out?</DialogTitle>
             <DialogDescription>
               Are you sure you want to sign out? Your data will remain in the cloud.
             </DialogDescription>
@@ -1127,7 +873,7 @@ export default function Home() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleLogout}>
-              Sign Out
+              Sign out
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,22 @@
-// API client for RecipeRadar backend
+/* eslint-disable @typescript-eslint/no-explicit-any -- legacy FastAPI adapters normalize heterogeneous JSON records here */
+// API client for the GymFuel backend
 
-import { Recipe, Meal, GroceryItem, ClientSummary, CoachSummary } from './types'
+import {
+    Recipe,
+    Meal,
+    GroceryItem,
+    ClientSummary,
+    CoachSummary,
+    FitnessGoal,
+    GeneratedGymRecipe,
+    GymMealType,
+    MealAnalysisDraft,
+    MealLog,
+    MealLogInput,
+    MealPreferences,
+    MealSuggestionInput,
+    PantryIngredient,
+} from './types'
 
 // API_BASE_URL: Empty string = relative URLs (works through nginx reverse proxy)
 // In development without Docker, you can set NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -40,8 +56,9 @@ class ApiClient {
         options: RequestInit = {}
     ): Promise<T> {
         const token = getToken()
+        const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
         const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
+            ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
             ...(options.headers as Record<string, string>),
         }
 
@@ -96,7 +113,7 @@ class ApiClient {
         role?: 'client' | 'coach'
         full_name?: string
         dietary_restrictions?: string[]
-        preferences?: Record<string, any>
+        preferences?: Record<string, unknown>
     }) {
         return this.request<{ id: string; email: string; username: string; role: string; client_code: string }>('/api/auth/register/', {
             method: 'POST',
@@ -134,8 +151,236 @@ class ApiClient {
             role: 'client' | 'coach'
             client_code?: string
             dietary_restrictions?: string[]
-            preferences?: Record<string, any>
+            preferences?: Record<string, unknown>
         }>('/api/auth/me/')
+    }
+
+    async updateNutritionTargets(dailyCalorieTarget: number, dailyProteinTarget: number) {
+        return this.request<{
+            daily_calorie_target: number
+            daily_protein_target: number
+        }>('/api/auth/me/nutrition-targets', {
+            method: 'PATCH',
+            body: JSON.stringify({
+                daily_calorie_target: dailyCalorieTarget,
+                daily_protein_target: dailyProteinTarget,
+            }),
+        })
+    }
+
+    async updateMealPreferences(preferences: MealPreferences) {
+        return this.request('/api/auth/me/meal-preferences', {
+            method: 'PATCH',
+            body: JSON.stringify({
+                dietary_restrictions: preferences.dietaryRestrictions,
+                preferred_cuisines: preferences.preferredCuisines,
+                disliked_ingredients: preferences.dislikedIngredients,
+                max_prep_time_minutes: preferences.maxPrepTimeMinutes ?? null,
+                fitness_goal: preferences.fitnessGoal,
+            }),
+        })
+    }
+
+    // ============ GymFuel Lens Endpoints ============
+
+    async getMealLogs(filters: { startAt?: string; endAt?: string; favorite?: boolean } = {}): Promise<MealLog[]> {
+        const params = new URLSearchParams()
+        if (filters.startAt) params.set('start_at', filters.startAt)
+        if (filters.endAt) params.set('end_at', filters.endAt)
+        if (filters.favorite !== undefined) params.set('favorite', String(filters.favorite))
+        const query = params.size ? `?${params.toString()}` : ''
+        const logs = await this.request<any[]>(`/api/meal-logs/${query}`)
+        return logs.map(this.mapMealLog)
+    }
+
+    async analyzeMealPhoto(photo: Blob, portionContext?: string): Promise<MealAnalysisDraft> {
+        const form = new FormData()
+        form.append('photo', photo, 'meal.jpg')
+        if (portionContext?.trim()) form.append('portion_context', portionContext.trim())
+        const draft = await this.request<any>('/api/meal-logs/analyze', {
+            method: 'POST',
+            body: form,
+        })
+        return {
+            title: draft.title,
+            foods: draft.foods || [],
+            nutritionalInfo: draft.nutritional_info,
+            assumptions: draft.assumptions || [],
+        }
+    }
+
+    async suggestMeal(input: MealSuggestionInput): Promise<GeneratedGymRecipe> {
+        const response = await this.request<any>('/api/meal-logs/suggest', {
+            method: 'POST',
+            body: JSON.stringify({
+                meal_type: input.mealType,
+                available_time_minutes: input.availableTimeMinutes,
+                remaining_calories: input.remainingCalories,
+                remaining_protein: input.remainingProtein,
+            }),
+        })
+        const recipe = response.recipe
+        return {
+            title: recipe.title,
+            description: recipe.description || '',
+            instructions: recipe.instructions,
+            prepTime: recipe.prep_time,
+            cookTime: recipe.cook_time,
+            servings: recipe.servings,
+            difficulty: recipe.difficulty,
+            tags: recipe.tags || [],
+            ingredients: (recipe.ingredients || []).map((ingredient: any) => ({
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit,
+                availableInPantry: ingredient.available_in_pantry,
+            })),
+            nutritionalInfo: recipe.nutritional_info,
+            missingIngredients: recipe.missing_ingredients || [],
+        }
+    }
+
+    async createMealLog(input: MealLogInput): Promise<MealLog> {
+        const response = await this.request<any>('/api/meal-logs/', {
+            method: 'POST',
+            body: JSON.stringify(this.mealLogPayload(input)),
+        })
+        return this.mapMealLog(response)
+    }
+
+    async updateMealLog(id: string, input: Partial<MealLogInput>): Promise<MealLog> {
+        const response = await this.request<any>(`/api/meal-logs/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(this.mealLogPayload(input)),
+        })
+        return this.mapMealLog(response)
+    }
+
+    async deleteMealLog(id: string) {
+        return this.request<void>(`/api/meal-logs/${id}`, { method: 'DELETE' })
+    }
+
+    async getPantry(): Promise<PantryIngredient[]> {
+        const ingredients = await this.request<any[]>('/api/pantry/')
+        return ingredients.map(item => ({
+            id: String(item.id),
+            userId: String(item.user_id),
+            name: item.name,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+        }))
+    }
+
+    async addPantryIngredient(name: string): Promise<PantryIngredient> {
+        const item = await this.request<any>('/api/pantry/', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+        })
+        return {
+            id: String(item.id),
+            userId: String(item.user_id),
+            name: item.name,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+        }
+    }
+
+    async deletePantryIngredient(id: string) {
+        return this.request<void>(`/api/pantry/${id}`, { method: 'DELETE' })
+    }
+
+    async generatePantryRecipes(goal: FitnessGoal, mealType: GymMealType): Promise<GeneratedGymRecipe[]> {
+        const response = await this.request<any>('/api/pantry/generate', {
+            method: 'POST',
+            body: JSON.stringify({ goal, meal_type: mealType }),
+        })
+        return (response.recipes || []).map((recipe: any) => ({
+            title: recipe.title,
+            description: recipe.description || '',
+            instructions: recipe.instructions,
+            prepTime: recipe.prep_time,
+            cookTime: recipe.cook_time,
+            servings: recipe.servings,
+            difficulty: recipe.difficulty,
+            tags: recipe.tags || [],
+            ingredients: (recipe.ingredients || []).map((ingredient: any) => ({
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit,
+                availableInPantry: ingredient.available_in_pantry,
+            })),
+            nutritionalInfo: recipe.nutritional_info,
+            missingIngredients: recipe.missing_ingredients || [],
+        }))
+    }
+
+    async saveGeneratedRecipe(recipe: GeneratedGymRecipe): Promise<Recipe> {
+        const response = await this.request<any>('/api/recipes/', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: recipe.title,
+                description: recipe.description,
+                instructions: recipe.instructions,
+                prep_time: recipe.prepTime,
+                cook_time: recipe.cookTime,
+                servings: recipe.servings,
+                difficulty: recipe.difficulty,
+                tags: recipe.tags,
+                ingredients: recipe.ingredients.map(ingredient => ({
+                    name: ingredient.name,
+                    quantity: ingredient.quantity,
+                    unit: ingredient.unit,
+                })),
+                nutritional_info: recipe.nutritionalInfo,
+            }),
+        })
+        return {
+            id: String(response.id),
+            title: response.title,
+            description: response.description || '',
+            ingredients: (response.ingredients || []).map((ingredient: any) => ingredient.name || ingredient),
+            instructions: response.instructions,
+            prepTime: response.prep_time || 0,
+            cookTime: response.cook_time || 0,
+            servings: response.servings || 1,
+            difficulty: response.difficulty
+                ? `${response.difficulty.charAt(0).toUpperCase()}${response.difficulty.slice(1)}` as Recipe['difficulty']
+                : 'Easy',
+            tags: response.tags || [],
+            imageUrl: response.image_url,
+            nutritionalInfo: response.nutritional_info || undefined,
+            createdAt: response.created_at,
+        }
+    }
+
+    private mapMealLog(log: any): MealLog {
+        return {
+            id: String(log.id),
+            userId: String(log.user_id),
+            title: log.title,
+            foods: log.foods || [],
+            nutritionalInfo: log.nutritional_info,
+            eatenAt: log.eaten_at,
+            notes: log.notes || undefined,
+            favorite: Boolean(log.favorite),
+            sourceRecipeId: log.source_recipe_id ? String(log.source_recipe_id) : undefined,
+            createdAt: log.created_at,
+            updatedAt: log.updated_at,
+        }
+    }
+
+    private mealLogPayload(input: Partial<MealLogInput>) {
+        return {
+            ...(input.title !== undefined ? { title: input.title } : {}),
+            ...(input.foods !== undefined ? { foods: input.foods } : {}),
+            ...(input.nutritionalInfo !== undefined ? { nutritional_info: input.nutritionalInfo } : {}),
+            ...(input.eatenAt !== undefined ? { eaten_at: input.eatenAt } : {}),
+            ...(input.notes !== undefined ? { notes: input.notes || null } : {}),
+            ...(input.favorite !== undefined ? { favorite: input.favorite } : {}),
+            ...(input.sourceRecipeId !== undefined
+                ? { source_recipe_id: input.sourceRecipeId ? Number(input.sourceRecipeId) : null }
+                : {}),
+        }
     }
 
     // Recipe endpoints

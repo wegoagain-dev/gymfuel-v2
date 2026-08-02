@@ -1,13 +1,18 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, Boolean, Date, JSON
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, Boolean, Date, JSON, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.core.config import settings
 
 engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def utc_now():
+    """Return an aware UTC timestamp for new Lens records."""
+    return datetime.now(timezone.utc)
 
 
 def get_db():
@@ -37,6 +42,8 @@ class User(Base):
     family = relationship("Family", back_populates="members")
     meals = relationship("Meal", back_populates="user")
     grocery_items = relationship("GroceryItem", back_populates="user")
+    meal_logs = relationship("MealLog", back_populates="user", cascade="all, delete-orphan")
+    pantry_ingredients = relationship("PantryIngredient", back_populates="user", cascade="all, delete-orphan")
 
 
 class Family(Base):
@@ -115,3 +122,44 @@ class CoachClient(Base):
     coach = relationship("User", foreign_keys=[coach_id])
     client = relationship("User", foreign_keys=[client_id])
 
+
+class MealLog(Base):
+    """A confirmed meal the user consumed; separate from the planned meal calendar."""
+
+    __tablename__ = "meal_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    foods = Column(JSON, default=list, nullable=False)
+    calories = Column(Float, default=0, nullable=False)
+    protein = Column(Float, default=0, nullable=False)
+    carbs = Column(Float, default=0, nullable=False)
+    fat = Column(Float, default=0, nullable=False)
+    eaten_at = Column(DateTime(timezone=True), nullable=False, index=True)
+    notes = Column(Text)
+    favorite = Column(Boolean, default=False, nullable=False, index=True)
+    source_recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    user = relationship("User", back_populates="meal_logs")
+    source_recipe = relationship("Recipe")
+
+
+class PantryIngredient(Base):
+    """A deliberately lightweight list of ingredients currently available."""
+
+    __tablename__ = "pantry_ingredients"
+    __table_args__ = (
+        UniqueConstraint("user_id", "normalized_name", name="uq_pantry_user_ingredient"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    name = Column(String(120), nullable=False)
+    normalized_name = Column(String(120), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    user = relationship("User", back_populates="pantry_ingredients")

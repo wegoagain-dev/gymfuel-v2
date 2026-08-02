@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     GEMINI_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_MEAL_ANALYSIS_MODEL: str = "gpt-5.6-terra"
+    OPENAI_RECIPE_MODEL: str = "gpt-5.6-luna"
     UNSPLASH_ACCESS_KEY: Optional[str] = None
     ALLOWED_ORIGINS: str = (
         ""  # For CORS - set via env var or leave empty for production

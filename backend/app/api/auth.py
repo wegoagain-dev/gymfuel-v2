@@ -8,7 +8,15 @@ from typing import Optional
 import secrets
 
 from app.models.database import get_db, User
-from app.schemas.schemas import UserCreate, UserResponse, Token
+from app.schemas.schemas import (
+    MealPreferencesResponse,
+    MealPreferencesUpdate,
+    NutritionTargetsResponse,
+    NutritionTargetsUpdate,
+    Token,
+    UserCreate,
+    UserResponse,
+)
 from app.core.config import settings
 
 router = APIRouter()
@@ -119,3 +127,33 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
+
+@router.patch("/me/nutrition-targets", response_model=NutritionTargetsResponse)
+async def update_nutrition_targets(
+    targets: NutritionTargetsUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    preferences = dict(current_user.preferences or {})
+    preferences.update(targets.model_dump())
+    current_user.preferences = preferences
+    db.commit()
+    db.refresh(current_user)
+    return NutritionTargetsResponse(**targets.model_dump())
+
+
+@router.patch("/me/meal-preferences", response_model=MealPreferencesResponse)
+async def update_meal_preferences(
+    meal_preferences: MealPreferencesUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    current_user.dietary_restrictions = meal_preferences.dietary_restrictions
+    preferences = dict(current_user.preferences or {})
+    preferences.update(
+        meal_preferences.model_dump(exclude={"dietary_restrictions"})
+    )
+    current_user.preferences = preferences
+    db.commit()
+    db.refresh(current_user)
+    return MealPreferencesResponse(**meal_preferences.model_dump())

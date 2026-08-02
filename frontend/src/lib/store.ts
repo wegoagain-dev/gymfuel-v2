@@ -1,7 +1,21 @@
 // Zustand store for RecipeRadar with Authentication
 
 import { create } from 'zustand'
-import { Recipe, Meal, GroceryItem, User } from './types'
+import {
+    Recipe,
+    Meal,
+    GroceryItem,
+    User,
+    FitnessGoal,
+    GeneratedGymRecipe,
+    GymMealType,
+    MealAnalysisDraft,
+    MealLog,
+    MealLogInput,
+    MealPreferences,
+    MealSuggestionInput,
+    PantryIngredient,
+} from './types'
 import {
     getRecipes,
     saveRecipe as saveRecipeToStorage,
@@ -26,6 +40,9 @@ interface AppStore {
     recipes: Recipe[]
     meals: Meal[]
     groceryItems: GroceryItem[]
+    mealLogs: MealLog[]
+    pantryIngredients: PantryIngredient[]
+    generatedRecipes: GeneratedGymRecipe[]
     isAddRecipeModalOpen: boolean
     isAddGroceryModalOpen: boolean
     isGenerateAIModalOpen: boolean
@@ -74,6 +91,20 @@ interface AppStore {
     setItemToEdit: (item: GroceryItem | null) => void
     setMealToEdit: (meal: Meal | null) => void
     setEditMealModalOpen: (open: boolean) => void
+
+    // Lens actions
+    refreshLensData: () => Promise<void>
+    analyzeMealPhoto: (photo: Blob, portionContext?: string) => Promise<MealAnalysisDraft>
+    suggestMeal: (input: MealSuggestionInput) => Promise<GeneratedGymRecipe>
+    createMealLog: (input: MealLogInput) => Promise<MealLog>
+    updateMealLog: (id: string, input: Partial<MealLogInput>) => Promise<MealLog>
+    deleteMealLog: (id: string) => Promise<void>
+    addPantryIngredient: (name: string) => Promise<PantryIngredient>
+    deletePantryIngredient: (id: string) => Promise<void>
+    generatePantryRecipes: (goal: FitnessGoal, mealType: GymMealType) => Promise<GeneratedGymRecipe[]>
+    saveGeneratedRecipe: (recipe: GeneratedGymRecipe) => Promise<Recipe>
+    updateNutritionTargets: (calories: number, protein: number) => Promise<void>
+    updateMealPreferences: (preferences: MealPreferences) => Promise<void>
 }
 
 export const useStore = create<AppStore>((set, get) => ({
@@ -87,6 +118,9 @@ export const useStore = create<AppStore>((set, get) => ({
     recipes: [],
     meals: [],
     groceryItems: [],
+    mealLogs: [],
+    pantryIngredients: [],
+    generatedRecipes: [],
     isAddRecipeModalOpen: false,
     isAddGroceryModalOpen: false,
     isGenerateAIModalOpen: false,
@@ -111,13 +145,15 @@ export const useStore = create<AppStore>((set, get) => ({
             })
 
             // Load data from cloud
-            const [recipes, meals, groceryItems] = await Promise.all([
+            const [recipes, meals, groceryItems, mealLogs, pantryIngredients] = await Promise.all([
                 api.getRecipes(),
                 api.getMeals(),
                 api.getGroceryItems(),
+                api.getMealLogs(),
+                api.getPantry(),
             ])
 
-            set({ recipes, meals, groceryItems })
+            set({ recipes, meals, groceryItems, mealLogs, pantryIngredients })
         } catch (error) {
             console.error('Login failed:', error)
             throw error
@@ -140,6 +176,15 @@ export const useStore = create<AppStore>((set, get) => ({
                 isAuthModalOpen: false
             })
 
+            const [recipes, meals, groceryItems, mealLogs, pantryIngredients] = await Promise.all([
+                api.getRecipes(),
+                api.getMeals(),
+                api.getGroceryItems(),
+                api.getMealLogs(),
+                api.getPantry(),
+            ])
+            set({ recipes, meals, groceryItems, mealLogs, pantryIngredients })
+
             // Sync local data to cloud - DISABLED as we are moving away from guest mode
             // await get().syncLocalDataToCloud()
         } catch (error) {
@@ -157,6 +202,9 @@ export const useStore = create<AppStore>((set, get) => ({
             recipes: [],
             meals: [],
             groceryItems: [],
+            mealLogs: [],
+            pantryIngredients: [],
+            generatedRecipes: [],
         })
         window.location.href = '/' // Force redirect to home/login to clear all state
     },
@@ -170,13 +218,15 @@ export const useStore = create<AppStore>((set, get) => ({
             set({ user, token, isAuthenticated: true })
 
             // Load data from cloud
-            const [recipes, meals, groceryItems] = await Promise.all([
+            const [recipes, meals, groceryItems, mealLogs, pantryIngredients] = await Promise.all([
                 api.getRecipes(),
                 api.getMeals(),
                 api.getGroceryItems(),
+                api.getMealLogs(),
+                api.getPantry(),
             ])
 
-            set({ recipes, meals, groceryItems })
+            set({ recipes, meals, groceryItems, mealLogs, pantryIngredients })
         } catch (error) {
             console.error('Failed to load user:', error)
             removeToken()
@@ -414,4 +464,81 @@ export const useStore = create<AppStore>((set, get) => ({
 
     setAddGroceryModalOpen: (open) => set({ isAddGroceryModalOpen: open }),
     setItemToEdit: (item) => set({ itemToEdit: item }),
+
+    // Lens actions
+    refreshLensData: async () => {
+        const [mealLogs, pantryIngredients] = await Promise.all([
+            api.getMealLogs(),
+            api.getPantry(),
+        ])
+        set({ mealLogs, pantryIngredients })
+    },
+
+    analyzeMealPhoto: (photo, portionContext) => api.analyzeMealPhoto(photo, portionContext),
+
+    suggestMeal: (input) => api.suggestMeal(input),
+
+    createMealLog: async (input) => {
+        const saved = await api.createMealLog(input)
+        set((state) => ({
+            mealLogs: [saved, ...state.mealLogs].sort(
+                (a, b) => new Date(b.eatenAt).getTime() - new Date(a.eatenAt).getTime()
+            ),
+        }))
+        return saved
+    },
+
+    updateMealLog: async (id, input) => {
+        const updated = await api.updateMealLog(id, input)
+        set((state) => ({
+            mealLogs: state.mealLogs.map((meal) => meal.id === id ? updated : meal),
+        }))
+        return updated
+    },
+
+    deleteMealLog: async (id) => {
+        await api.deleteMealLog(id)
+        set((state) => ({ mealLogs: state.mealLogs.filter((meal) => meal.id !== id) }))
+    },
+
+    addPantryIngredient: async (name) => {
+        const ingredient = await api.addPantryIngredient(name)
+        set((state) => ({
+            pantryIngredients: [...state.pantryIngredients, ingredient].sort((a, b) =>
+                a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+            ),
+        }))
+        return ingredient
+    },
+
+    deletePantryIngredient: async (id) => {
+        await api.deletePantryIngredient(id)
+        set((state) => ({
+            pantryIngredients: state.pantryIngredients.filter((ingredient) => ingredient.id !== id),
+        }))
+    },
+
+    generatePantryRecipes: async (goal, mealType) => {
+        const generatedRecipes = await api.generatePantryRecipes(goal, mealType)
+        set({ generatedRecipes })
+        return generatedRecipes
+    },
+
+    saveGeneratedRecipe: async (recipe) => {
+        const saved = await api.saveGeneratedRecipe(recipe)
+        set((state) => ({ recipes: [saved, ...state.recipes] }))
+        return saved
+    },
+
+    updateNutritionTargets: async (calories, protein) => {
+        await api.updateNutritionTargets(calories, protein)
+        const user = await api.getMe()
+        set({ user })
+    },
+
+    updateMealPreferences: async (preferences) => {
+        await api.updateMealPreferences(preferences)
+        const user = await api.getMe()
+        set({ user })
+    },
 }))
