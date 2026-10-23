@@ -1,160 +1,173 @@
-# GymFuel - ECS DevOps Production Project
+# GymFuel v2
 
-## Content
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-  - [Application](#application)
-  - [DevOps/Infrastructure](#devopsinfrastructure)
-- [Architecture Explained](#architecture-explained)
-  - [Terraform State Management](#terraform-state-management)
-  - [CI/CD Pipelines](#cicd-pipelines)
-  - [Security](#security)
-  - [Monitoring and Observability](#monitoring-and-observability)
-- [Local Development Setup](#local-development-setup)
-  - [Prerequisites](#prerequisites)
-  - [Using Docker Compose](#using-docker-compose)
-  - [Terraform Setup](#terraform-setup)
-- [Development Roadmap](#development-roadmap)
-- [License](#license)
-- [Support](#support)
+A from-scratch rebuild of [GymFuel](https://gymfuel.xyz): photograph meals and confirm
+AI-estimated macros, track calories and protein against your own targets, turn the food in your
+kitchen into high-protein recipes, keep a shopping list with expiry warnings, and let a coach
+follow linked clients.
 
-## Overview
-GymFuel is a complete full-stack project that demonstrates modern web application development and production ready DevOps practices. This project showcases a Next.js frontend with a FastAPI backend, featuring AI-powered recipe generation, meal planning, grocery tracking, and a coach-client system. This is deployed on AWS ECS with containerised infrastructure.
+Built with **Next.js 16** (App Router, Server Components, Server Actions), **TypeScript**,
+**Tailwind CSS v4**, **shadcn/ui** (Radix), a few **EasyUI** components, **Drizzle ORM** and
+**Postgres**.
 
-## Architecture
-![Architecture Diagram](./images/ecs-gymfuel.png)
+> Status: local only. Nothing here is deployed, and the live site, cluster and Cloudflare
+> setup are untouched.
 
-### Architecture Explained
+## Run it locally
 
-1. **CI/CD Pipeline:** GitHub Actions → Terraform → AWS
-2. **Container Registry:** Docker → Amazon ECR
-3. **Load Balancing:** Application Load Balancer with health checks
-4. **Container Orchestration:** ECS Fargate across multiple AZs
-5. **Monitoring:** CloudWatch logs and metrics
+Requirements: Node.js 20.9+ (tested with Node 26) and npm. You don't need Docker or a
+Postgres install.
 
-## Tech Stack
+```bash
+npm install
+npm run dev
+```
 
-### Application
-- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS v4, shadcn/ui
-- **Backend:** FastAPI (Python 3.11), PostgreSQL
-- **Authentication:** JWT with role-based access (client/coach)
-- **AI Integration:** Recipe generation API (coming soon!)
+Open http://localhost:3000. On first start the app creates an embedded Postgres database
+(PGlite) in `./.data/pglite`, applies the migrations, and loads demo data.
 
-## Infrastructure
+### Demo accounts
 
-### Cloud
-- **Containerisation:** Docker multi-stage builds for optimised image sizes
-- **Orchestration:** AWS ECS (Elastic Container Service) with Fargate, Production Ready
-- **Container Registry:** AWS ECR (Elastic Container Registry)
-- **Database:** AWS RDS PostgreSQL with optional automated backups
-- **Networking:** AWS VPC with public/private subnets/database subnets, Application Load Balancer, Multi-AZ deployment
-- **Infrastructure as Code:** Terraform for cloud infrastructure, Docker Compose for local development
-- **Reverse Proxy:** Nginx for request routing (only for docker-compose)
+All demo accounts use the password `GymFuel123`.
 
-### Security
-- **IAM Roles:** IAM Role-based access control for AWS resources, least privilege principle
-- **Logging:** AWS CloudTrail for activity logging
-- **HTTPS:** Automatically provisioned SSL/TLS certificates using AWS Certificate Manager (ACM)
-- **Security Groups:** AWS Security Groups for network traffic control
+| Email | Role | What it has |
+| --- | --- | --- |
+| `alex@gymfuel.test` | client | Targets, 7 days of meals, recipes, kitchen items, a shopping list. Coached by Jo. |
+| `coach@gymfuel.test` | coach | Linked to Alex, so you can try the Clients area |
+| `sam@gymfuel.test` | client | Not linked. Link Sam as the coach with client code `5A3D9C1E7B2F4A60` |
 
-### Terraform State Management
-- **Remote Backend:** S3 bucket in `eu-west-2` with encryption enabled
-- **Benefits:** Centralised state storage, team collaboration, automated backups, cross-environment consistency
+You can also register a new account at `/register`.
 
-### CI/CD Pipelines
-1. CI Pipeline (ci.yml)
-    - **Trigger:** On push to main branch
-    - **Actions:**
-      - Build Docker image using Dockerfile
-      - Scan Images using Trivy
-      - Push Docker image to ECR
-      - Deploy to ECS Fargate
+### Useful scripts
 
-### Trivy (Security Scanning)
-![](./images/trivy-scan-fail.png)
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Dev server on :3000 |
+| `npm run db:seed` | **Deletes all data** and reloads the demo data. With PGlite, stop `npm run dev` first, because only one process can open the database |
+| `npm run db:migrate` | Applies pending migrations (the app also does this on start) |
+| `npm run db:generate` | Creates a new SQL migration in `./drizzle` after you edit `src/db/schema.ts` |
+| `npm run db:studio` | Drizzle Studio, a database browser (needs `DATABASE_URL` set to a Postgres server) |
+| `npm run typecheck` / `npm run lint` / `npm run build` | Checks |
 
-Image is showing Trivy blocking a CRITICAL vulnerability, stopping my workflow from proceeding and preventing deployment.
+### Using real Postgres instead of PGlite
 
----
+```bash
+docker compose up -d
+echo 'DATABASE_URL=postgres://gymfuel:gymfuel@localhost:5432/gymfuel' >> .env.local
+npm run dev
+```
 
-## Setup Guide
+Any Postgres 14+ works, including the `gymfuel-postgres` pattern used in the homelab.
 
-### Prerequisites
-- Docker
-- AWS CLI
-- Terraform for [Terraform Setup](#terraform-setup)
-- Added access keys to use workflow automation (GitHub Actions)
+### Turning on real AI
 
-### Terraform Setup
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/wegoagain-dev/ECS-GymFuel.git
-    cd ECS-GymFuel
-    ```
-2. Configure terraform.tfvars and modify where needed
-    ```bash
-    cd terraform
-    cp terraform.tfvars.example terraform.tfvars
-    ```
-3. Create a new S3 bucket for Terraform state storage:
-    ```bash
-    # create bucket (with same name as the backend s3) first in aws with bucket name, region, versioning, encryption, block public access
-    ```
-4. Initialise Terraform:
-    ```bash
-    terraform init
-    ```
-4. Apply Terraform configuration:
-    ```bash
-    terraform apply
-    ```
-5. Initialise GitHub Actions:
-    ```bash
-    cd ..
-    git init
-    git add .
-    git commit -m "Initial commit"
-    git branch -M main
-    git remote add origin https://github.com/<your-name>/<your-repo-name>.git # create a new repository on GitHub and replace <your-name> with your username
-    git push -u origin main
-    ```
+Without an API key, the AI features run in **demo mode**:
+- **Lens** can't see the photo. It builds a draft from the portion notes you type (for
+  example "250g chicken, 150g rice") using a small nutrition table. You can also use
+  "Use notes only" without a photo.
+- **Pick a meal for me** and **Generate three recipes** come from templates that use your
+  kitchen items, goal, meal type, dietary needs and dislikes.
 
-### Using Docker Compose
-1.  **Configure Environment Variables**
-    Copy the example configuration file to create your local secrets file:
-    ```bash
-    cp .env.example .env
-    ```
-2.  **Start the Application**
-    Build and start the containers in the background:
-    ```bash
-    docker-compose up -d --build
-    ```
-3.  **Access Services**
-    - Web App: http://localhost (http://localhost) (Proxied via Nginx)
-    - API Docs: http://localhost:8000/docs (http://localhost:8000/docs) (Swagger UI)
-    - Database: localhost:5432 (User/Pass: postgres/postgres from default .env)
-4.  **Stop the Application**
-    To stop all running containers:
-    ```bash
-    docker-compose down
-    ```
+To use OpenAI, as the old app did, copy `.env.example` to `.env.local` and set
+`OPENAI_API_KEY`. You can also set `OPENAI_MEAL_ANALYSIS_MODEL` and `OPENAI_RECIPE_MODEL`;
+their defaults are the model names the old backend used. Set `UNSPLASH_ACCESS_KEY` to give
+new recipes a stock photo.
 
----
+## How it's put together
 
-## Development Roadmap
+```
+src/
+  app/
+    page.tsx                 landing page (static)
+    (auth)/login, register   sign-in / sign-up
+    (app)/                   signed-in area: today, meals, groceries, recipes, profile, coach
+    actions/                 Server Actions (all writes), one file per area
+    api/lens/analyze         photo upload → AI draft (multipart, so a Route Handler)
+    api/health               liveness + DB check (for k8s probes later)
+    api/auth/clear           clears a stale session cookie
+  db/
+    schema.ts                Drizzle schema (the data model)
+    connect.ts               PGlite or Postgres, chosen from DATABASE_URL, plus migrations
+    seed.ts                  demo data
+  lib/
+    auth/session.ts          signed JWT in an httpOnly cookie
+    auth/dal.ts              getCurrentUser / requireUser / requireCoach
+    data.ts                  read queries (always scoped to the signed-in user)
+    ai/                      OpenAI calls + offline demo generator
+    validation.ts            zod schemas shared by actions and AI output
+  components/
+    ui/                      shadcn/ui + EasyUI components (owned source)
+    today, meals, groceries, recipes, coach, profile, app/
+drizzle/                     SQL migrations
+```
 
-- [ ] Full AI Recipe Generation
-- [ ] Mobile app (React Native)
-- [ ] Implement OIDC instead of manual github actions keys
-- [ ] Monitoring and Observability (CPU, Memory, Disk Space)
+### Why one Next.js app instead of Next.js + FastAPI
 
-## License
+The old app had three moving parts: Next.js, FastAPI and Postgres. A thin client called a
+REST API, and the JWT lived in `localStorage`. v2 folds the API into Next.js:
 
-Copyright (c) 2026 Tawfiq Rahman. All Rights Reserved.
-This project is proprietary and may not be copied, modified, or distributed without written permission.
+- **Reads** run in Server Components, which query Postgres directly through Drizzle.
+- **Writes** are Server Actions, so there's no hand-written fetch/axios layer or API client.
+- **Auth** is an httpOnly, signed session cookie, so page JavaScript can't read the token.
+  Every action and query re-checks the session through `lib/auth/dal.ts`.
+- **Postgres** stays. The schema is plain Postgres (`serial`, `jsonb`, `timestamptz`), so it
+  runs against the existing kind of Postgres deployment. PGlite is the same Postgres compiled
+  to WASM, used only so local setup is `npm install && npm run dev`.
 
-## Support
+The cost: one deployment instead of two, and the Cloudflare route `^/api(/|$)` → backend
+would no longer be needed. Under v2, `/api/*` is served by Next.js itself.
 
-For support, email tsdevelops00@gmail.com or open an issue in the repository. Dont be shy to contact me!
+## Old app → v2
+
+The full inventory of the old app is in [docs/FEATURE_INVENTORY.md](docs/FEATURE_INVENTORY.md).
+
+| Area | Old app | v2 |
+| --- | --- | --- |
+| Landing | Hero + preview cards | Same idea, plus a features section; light **and** dark theme |
+| Auth | Modal; register (client/coach) → auto-login; JWT in localStorage | Dedicated `/login` + `/register` pages; same password rules; httpOnly cookie session; deep-link `?next=` |
+| Today | Calories/protein vs targets, Lens photo → confirm, "Pick a meal for me", today's meals | All of that, plus a macro donut, an "over target" state, and editing meals from Today |
+| My Meals | Search, favourites, edit, log again, delete | Same, grouped by day with daily totals |
+| Groceries | Kitchen list + AI recipes; shopping list with expiry status | Same. Shopping list items can also be ticked off |
+| Recipes | Search, add (name/protein/description/ingredients/tags), delete | Same, plus a **recipe detail page**, **edit**, full macros/times/difficulty/method, and **"Log this meal"** |
+| Profile | Dialog: targets + AI preferences | `/profile` page with the same fields, plus your coach and the theme |
+| Coach | Link/unlink by email + client code; client's *planned meals* + recipes | Link/unlink the same way; client view shows **meals actually logged** in the last 7 days, a protein-vs-target chart, and recipes |
+| Mobile | Bottom dock | Bottom dock |
+
+**Changed on purpose**
+- The coach view uses logged meals instead of the old meal-planner table. Clients could no
+  longer add planned meals, so coaches always saw "No meals planned yet".
+- Clients' recipes, and saved AI recipes, can now be opened and read. Before, there was no
+  detail view.
+
+**Not carried over** (none of these had any UI in the old app)
+- The meal planner (`/api/meals`, "generate week").
+- The Gemini recipe endpoints.
+- The WebSocket "family sync" and the `families` table.
+- Guest/localStorage mode.
+- Bulk grocery import.
+
+Any of them can come back if you want them.
+
+## EasyUI
+
+[EasyUI](https://easyui.site) is an MIT-licensed registry of animated React components, built
+on Tailwind and Framer Motion, that installs through the shadcn CLI, for example
+`npx shadcn@latest add Surajmaurya1/easyui/donut-chart`. This app uses three of them:
+
+- `animated-number`: the rolling calorie and protein totals on Today
+- `donut-chart`: today's macro split
+- `draw-checkbox`: ticking items off the shopping list
+
+Notes for when you add more:
+- EasyUI ships its own `utils.ts`, `badge.tsx`, `alert.tsx` and `sheet.tsx`. Answer **No**
+  when the CLI asks to overwrite shadcn's files.
+- Its components expect a few CSS variables (`--accent`, `--surface-raised`, …). These are
+  mapped onto the shadcn theme by the `.easyui` class in `globals.css`.
+- `animated-number.tsx` has two small, commented edits (`GymFuel tweak`): theme colour
+  instead of hard-coded white, and screen-reader text.
+
+## Notes for later (deploying)
+
+- Set `SESSION_SECRET` (32+ chars) and `DATABASE_URL`, and set `SEED_DEMO_DATA=false`.
+- The `./drizzle` folder must ship next to the server, because migrations run on start.
+- There's no login rate limiting yet. Cloudflare's WAF or an app-level limiter should cover
+  that before going live.

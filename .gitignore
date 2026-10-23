@@ -1,32 +1,48 @@
-# Environment Variables
-.env
-.env.local
-.env.*.local
-!.env.example
-!.env.local.example
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# OS Files
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-Thumbs.db
-._*
+*.pem
 
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Docker / Infrastructure
-docker-compose.override.yml
-
-# Logs
-*.log
+# debug
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Node / Python generic ignores (just in case they end up in root)
-node_modules/
-__pycache__/
-venv/
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
 
-my_fixes.md
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local embedded Postgres (PGlite) data
+/.data
+
+# local Claude Code preview config
+/.claude
