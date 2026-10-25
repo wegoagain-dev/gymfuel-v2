@@ -1,0 +1,29 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Map / Diagram",
+  "theme": "brutal",
+  "axes": "light/grotesk-heavy/chromatic-yellow",
+  "hero": "Stage",
+  "nav": "banner over a bar",
+  "footer": "mast",
+  "imagery": "screenshots 2 (capture.mjs), photographs 1",
+  "photos": [
+   "Colorful_pile_of_dumbbells_at_the_gym.jpg"
+  ],
+  "entry": "draw b5b929",
+  "sections": [
+   "Hero (Lens review capture)",
+   "Map (the gym-to-kitchen loop)",
+   "Showcase (a day of meals)",
+   "Band (close)",
+   "Footer"
+  ],
+  "signature": "the day macros as 900-weight numbers in shared-rule cells; the loop diagram on /",
+  "waived": [],
+  "prompt": "a meal and macro tracker for people who lift",
+  "date": "2026-10-25"
+ }
+]

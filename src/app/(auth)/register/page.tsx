@@ -8,13 +8,13 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track meals for yourself, or coach your clients.</p>
+        <h1 className="display text-5xl">Create your account</h1>
+        <p className="mt-3 text-muted-foreground">Track meals for yourself, or coach your clients.</p>
       </div>
       <RegisterForm />
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground underline underline-offset-4">
+        <Link href="/login" className="ink-link font-bold">
           Sign in
         </Link>
       </p>

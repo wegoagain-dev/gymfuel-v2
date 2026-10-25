@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useTransition } from "react"
-import { BookmarkPlus, Check, ChevronDown, Clock, Utensils } from "lucide-react"
+import { BookmarkPlus, Check, ChevronDown, Clock, ShoppingBasket, Utensils } from "lucide-react"
 import { toast } from "sonner"
 import { saveGeneratedRecipe } from "@/app/actions/recipes"
 import { MacroGrid } from "@/components/meals/macros"
@@ -51,19 +51,20 @@ export function GeneratedRecipeCard({
     })
 
   return (
-    <article className={cn("flex flex-col rounded-2xl border bg-card p-5", className)}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary" className="bg-accent text-accent-foreground">High protein</Badge>
-        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="size-3.5" /> {recipe.prepTime + recipe.cookTime} min · {recipe.servings} serving{recipe.servings === 1 ? "" : "s"}
+    <article className={cn("box flex flex-col bg-card p-5", className)}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Badge variant="default">High protein</Badge>
+        <span className="tabular inline-flex items-center gap-1 text-sm text-muted-foreground">
+          <Clock className="size-3.5" aria-hidden="true" /> {recipe.prepTime + recipe.cookTime} min
         </span>
+        <span className="tabular text-sm text-muted-foreground">{recipe.servings} serving{recipe.servings === 1 ? "" : "s"}</span>
       </div>
-      <h3 className="mt-3 text-lg font-semibold leading-snug">{recipe.title}</h3>
+      <h3 className="mt-4 text-xl leading-tight font-black">{recipe.title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{recipe.description}</p>
       <MacroGrid macros={recipe.nutrition} className="mt-4" />
       {showPantry && recipe.missingIngredients.length > 0 && (
-        <p className="mt-3 rounded-lg bg-warning/15 px-3 py-2 text-xs text-foreground">
-          <span className="font-medium">Missing:</span> {recipe.missingIngredients.join(", ")}
+        <p className="mt-3 bg-accent px-3 py-2 text-sm text-accent-foreground">
+          <span className="font-bold">Missing:</span> {recipe.missingIngredients.join(", ")}
         </p>
       )}
 
@@ -71,22 +72,22 @@ export function GeneratedRecipeCard({
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="mt-4 flex items-center gap-1 self-start text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="mt-4 flex items-center gap-1 self-start text-sm font-bold underline underline-offset-4 hover:bg-accent hover:text-accent-foreground"
       >
-        <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("size-4", open && "rotate-180")} aria-hidden="true" />
         {open ? "Hide" : "Show"} ingredients &amp; method
       </button>
       {open && (
-        <div className="mt-4 grid gap-5 border-t pt-4 text-sm">
+        <div className="mt-4 grid gap-5 border-t-3 border-foreground pt-4 text-sm">
           <ul className="flex flex-col gap-1.5">
             {recipe.ingredients.map((item, index) => (
               <li key={`${item.name}-${index}`} className="flex items-center gap-2">
-                {showPantry && (
-                  <span
-                    className={cn("size-2 rounded-full", item.availableInPantry ? "bg-success" : "bg-warning")}
-                    title={item.availableInPantry ? "In your kitchen" : "Need to buy"}
-                  />
-                )}
+                {showPantry &&
+                  (item.availableInPantry ? (
+                    <Check className="size-4 shrink-0" strokeWidth={3} aria-label="In your kitchen" />
+                  ) : (
+                    <ShoppingBasket className="size-4 shrink-0 text-muted-foreground" aria-label="Need to buy" />
+                  ))}
                 <span className="tabular text-muted-foreground">
                   {item.quantity || ""} {item.unit}
                 </span>
@@ -102,7 +103,7 @@ export function GeneratedRecipeCard({
         {savedId ? (
           <Button variant="outline" className="flex-1" asChild>
             <Link href={`/recipes/${savedId}`}>
-              <Check data-icon="inline-start" /> Saved — view
+              <Check data-icon="inline-start" /> Saved, view it
             </Link>
           </Button>
         ) : (

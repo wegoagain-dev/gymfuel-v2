@@ -28,9 +28,9 @@ export function RegisterForm() {
         )}
         <Field>
           <FieldLabel>I am a…</FieldLabel>
-          <ToggleGroup type="single" variant="outline" value={role} onValueChange={(value) => value && setRole(value)} className="w-full">
-            <ToggleGroupItem value="client" className="flex-1"><Dumbbell /> Gym-goer</ToggleGroupItem>
-            <ToggleGroupItem value="coach" className="flex-1"><Users /> Coach</ToggleGroupItem>
+          <ToggleGroup type="single" variant="outline" spacing={0} value={role} onValueChange={(value) => value && setRole(value)} className="w-full">
+            <ToggleGroupItem value="client" className="h-12 flex-1"><Dumbbell /> Gym-goer</ToggleGroupItem>
+            <ToggleGroupItem value="coach" className="h-12 flex-1"><Users /> Coach</ToggleGroupItem>
           </ToggleGroup>
         </Field>
         <div className="grid grid-cols-2 gap-3">
@@ -59,7 +59,7 @@ export function RegisterForm() {
           <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required {...field("confirmPassword")} />
           <FieldError>{errors.confirmPassword}</FieldError>
         </Field>
-        <Button type="submit" size="lg" className="h-10" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending && <Spinner data-icon="inline-start" />} Create account
         </Button>
       </FieldGroup>

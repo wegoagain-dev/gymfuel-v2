@@ -95,7 +95,7 @@ export function MealEditorDialog({ state, onClose }: { state: MealEditorState; o
             {state?.estimate && (
               <Alert>
                 <Sparkles />
-                <AlertTitle>AI estimate — check it before saving</AlertTitle>
+                <AlertTitle>AI estimate. Check it before saving</AlertTitle>
                 {state.assumptions?.length ? (
                   <AlertDescription>
                     <ul className="list-disc pl-4">

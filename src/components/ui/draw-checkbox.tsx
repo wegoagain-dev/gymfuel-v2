@@ -85,7 +85,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
               duration: 0.32,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="w-4 h-4 rounded-[4px] border flex items-center justify-center cursor-pointer focus-ring"
+            className="w-4 h-4 rounded-none border flex items-center justify-center cursor-pointer focus-ring"
             style={{ borderColor: showCheck ? 'var(--accent)' : 'var(--border)' }}
           >
             {/* Path-draw checkmark with overshoot on stroke-dashoffset */}
@@ -99,7 +99,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
                 strokeWidth="2.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-black dark:text-white stroke-black dark:stroke-white"
+                className="text-foreground stroke-foreground"
                 initial={{ pathLength: 0, scale: 0.6, opacity: 0 }}
                 animate={{
                   pathLength: 1,
@@ -131,7 +131,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
                 animate={{ scaleX: 1 }}
                 transition={motionTransitions.springSnappy}
                 style={{ transformOrigin: 'left center' }}
-                className="w-2.5 h-[2px] rounded-full bg-black dark:bg-white"
+                className="w-2.5 h-[2px] rounded-none bg-foreground"
               />
             )}
           </motion.div>
@@ -143,7 +143,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
             className={cn('cursor-pointer text-left', disabled && 'cursor-not-allowed')}
           >
             {label && (
-              <div className="text-xs font-medium text-[var(--text-primary)] leading-tight">
+              <div className="text-xs font-bold text-[var(--text-primary)] leading-tight">
                 {label}
               </div>
             )}

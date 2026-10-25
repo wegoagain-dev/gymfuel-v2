@@ -29,7 +29,7 @@ export function LoginForm() {
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <Input id="password" name="password" type="password" autoComplete="current-password" required />
         </Field>
-        <Button type="submit" size="lg" className="h-10" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending && <Spinner data-icon="inline-start" />} Sign in
         </Button>
       </FieldGroup>

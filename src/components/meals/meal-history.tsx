@@ -76,26 +76,26 @@ export function MealHistory({ meals }: { meals: HistoryMeal[] }) {
           <InputGroupInput placeholder="Search meals or foods" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search meal history" />
           <InputGroupAddon><Search /></InputGroupAddon>
         </InputGroup>
-        <ToggleGroup type="single" variant="outline" value={filter} onValueChange={(value) => value && setFilter(value as typeof filter)}>
-          <ToggleGroupItem value="all" className="h-10 px-3"><History /> History</ToggleGroupItem>
-          <ToggleGroupItem value="favorites" className="h-10 px-3"><Heart /> Favourites</ToggleGroupItem>
+        <ToggleGroup type="single" variant="outline" spacing={0} value={filter} onValueChange={(value) => value && setFilter(value as typeof filter)}>
+          <ToggleGroupItem value="all" className="h-10 px-4"><History /> History</ToggleGroupItem>
+          <ToggleGroupItem value="favorites" className="h-10 px-4"><Heart /> Favourites</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
       {groups.length ? (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-10">
           {groups.map((group) => (
-            <section key={group.label} aria-label={group.label} className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between px-1">
-                <h2 className="text-sm font-semibold">{group.label}</h2>
-                <span className="tabular text-xs text-muted-foreground">
-                  {Math.round(group.meals.reduce((sum, meal) => sum + meal.nutrition.calories, 0)).toLocaleString("en-GB")} kcal ·{" "}
-                  {Math.round(group.meals.reduce((sum, meal) => sum + meal.nutrition.protein, 0))} g protein
-                </span>
+            <section key={group.label} aria-label={group.label} className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+                <h2 className="display text-2xl md:text-3xl">{group.label}</h2>
+                <p className="tabular flex gap-4 text-sm">
+                  <span>{Math.round(group.meals.reduce((sum, meal) => sum + meal.nutrition.calories, 0)).toLocaleString("en-GB")} kcal</span>
+                  <span className="font-bold">{Math.round(group.meals.reduce((sum, meal) => sum + meal.nutrition.protein, 0))} g protein</span>
+                </p>
               </div>
-              <ul className="flex flex-col gap-2">
+              <ul className="box flex flex-col divide-y divide-foreground bg-card">
                 {group.meals.map((meal) => (
-                  <li key={meal.id} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-[minmax(0,1fr)_320px_auto] md:items-center">
+                  <li key={meal.id} className="grid gap-3 p-4 hover:bg-muted md:grid-cols-[minmax(0,1fr)_320px_auto] md:items-center md:px-5">
                     <div className="flex min-w-0 items-start gap-3">
                       <Button
                         variant="ghost"
@@ -105,14 +105,16 @@ export function MealHistory({ meals }: { meals: HistoryMeal[] }) {
                         aria-pressed={meal.favorite}
                         aria-label={meal.favorite ? `Remove ${meal.title} from favourites` : `Add ${meal.title} to favourites`}
                       >
-                        <Heart className={cn(meal.favorite && "fill-fat text-fat")} />
+                        <Heart className={cn(meal.favorite && "fill-foreground")} />
                       </Button>
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{meal.title}</p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {meal.foods.map((food) => `${food.name}${food.portion ? ` (${food.portion})` : ""}`).join(" · ")}
+                        <p className="truncate font-bold">
+                          <span className="tabular mr-3 font-black">{meal.time}</span>
+                          {meal.title}
                         </p>
-                        <p className="tabular mt-1 text-xs text-muted-foreground">{meal.time}</p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          {meal.foods.map((food) => `${food.name}${food.portion ? ` (${food.portion})` : ""}`).join(", ")}
+                        </p>
                       </div>
                     </div>
                     <MacroGrid macros={meal.nutrition} />
@@ -153,7 +155,7 @@ export function MealHistory({ meals }: { meals: HistoryMeal[] }) {
           ))}
         </div>
       ) : (
-        <Empty className="rounded-2xl border border-dashed">
+        <Empty className="box bg-muted">
           <EmptyHeader>
             <EmptyMedia variant="icon">{filter === "favorites" ? <Heart /> : <History />}</EmptyMedia>
             <EmptyTitle>{meals.length ? "No matching meals" : "No meals yet"}</EmptyTitle>

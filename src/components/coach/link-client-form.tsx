@@ -23,10 +23,10 @@ export function LinkClientForm() {
   }, [state])
 
   return (
-    <form ref={formRef} onSubmit={action} className="rounded-2xl border bg-card p-5">
+    <form ref={formRef} onSubmit={action} className="bg-muted p-5 md:p-6">
       <FieldGroup>
         <div>
-          <h2 className="font-semibold">Link a client</h2>
+          <h2 className="display text-2xl">Link a client</h2>
           <p className="mt-1 text-sm text-muted-foreground">They&apos;ll find their code in the account menu.</p>
         </div>
         {state && !state.ok && <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>}

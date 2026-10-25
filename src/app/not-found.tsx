@@ -5,7 +5,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 
 export default function NotFound() {
   return (
-    <Empty className="min-h-[60svh]">
+    <Empty className="box min-h-[60svh] bg-muted">
       <EmptyHeader>
         <EmptyMedia variant="icon"><Compass /></EmptyMedia>
         <EmptyTitle>Page not found</EmptyTitle>

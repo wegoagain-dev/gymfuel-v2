@@ -203,7 +203,7 @@ export function DonutChart({
             fill="none"
             strokeWidth={thickness}
             strokeLinecap="round"
-            className="stroke-black/[0.05] dark:stroke-white/[0.06]"
+            className="stroke-muted"
           />
           {segs.map((sg, i) => (
             <Arc
@@ -237,7 +237,7 @@ export function DonutChart({
               transition={{ duration: 0.16, ease: EASE_OUT }}
             >
               <p className={`truncate text-[12px] ${muted}`}>{act ? act.label : centerLabel}</p>
-              <p className="font-semibold leading-tight tracking-[-0.03em] tabular-nums text-neutral-900 dark:text-neutral-50" style={{ fontSize: valueSize }}>
+              <p className="font-bold leading-tight tracking-[-0.03em] tabular-nums text-foreground" style={{ fontSize: valueSize }}>
                 {act ? formatValue(act.value) : <AnimatedNumber value={total} format={formatValue} fromZero={anim} />}
               </p>
               {act && <p className={`text-[12px] tabular-nums ${muted}`}>{Math.round(act.f * 100)}%</p>}
@@ -258,13 +258,13 @@ export function DonutChart({
                 onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
                 onFocus={() => setActive(i)}
                 onBlur={() => setActive(null)}
-                className={`flex h-11 w-full items-center gap-3 rounded-xl px-2.5 text-left text-[13px] transition-[background-color,opacity] duration-150 [-webkit-tap-highlight-color:transparent] sm:h-10 [@media(hover:hover)]:hover:bg-black/[0.04] dark:[@media(hover:hover)]:hover:bg-white/[0.05] ${focus} ${
+                className={`flex h-11 w-full items-center gap-3 rounded-none px-2.5 text-left text-[13px] transition-[background-color,opacity] duration-150 [-webkit-tap-highlight-color:transparent] sm:h-10 [@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground ${focus} ${
                   sg.off ? "opacity-45" : ""
                 }`}
               >
                 <Dot color={sg.color} />
-                <span className={cx("min-w-0 flex-1 truncate text-neutral-700 dark:text-neutral-300", sg.off && "line-through")}>{sg.label}</span>
-                <span className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatValue(sg.value)}</span>
+                <span className={cx("min-w-0 flex-1 truncate text-foreground", sg.off && "line-through")}>{sg.label}</span>
+                <span className="tabular-nums text-foreground">{formatValue(sg.value)}</span>
                 <span className={`w-9 text-right text-[12px] tabular-nums ${muted}`}>{sg.off ? "—" : `${Math.round(sg.f * 100)}%`}</span>
               </button>
             </li>
