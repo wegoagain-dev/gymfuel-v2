@@ -18,30 +18,31 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <PageHeader title="Profile & targets" description="Targets are yours to set — on your own or with a qualified professional. GymFuel's AI never prescribes them." />
+      <PageHeader title="Profile & targets" description="Targets are yours to set, on your own or with a qualified professional. GymFuel's AI never prescribes them." />
 
-      <section aria-label="Account" className="grid gap-4 rounded-2xl border bg-card p-5 sm:grid-cols-2">
-        <div>
-          <p className="text-xs text-muted-foreground">Signed in as</p>
-          <p className="mt-1 font-semibold">{user.fullName || user.username}</p>
-          <p className="text-sm text-muted-foreground">{user.email} · @{user.username}</p>
-          <Badge variant="secondary" className="mt-2 capitalize">{user.role}</Badge>
+      <section aria-label="Account" className="cells grid-cols-1 sm:grid-cols-2">
+        <div className="p-5">
+          <p className="text-sm text-muted-foreground">Signed in as</p>
+          <p className="mt-1 text-xl font-black">{user.fullName || user.username}</p>
+          <p className="text-sm text-muted-foreground">{user.email}</p>
+          <p className="text-sm text-muted-foreground">@{user.username}</p>
+          <Badge variant="default" className="mt-3 capitalize">{user.role}</Badge>
         </div>
-        <div className="flex flex-col gap-3 sm:items-end">
+        <div className="flex flex-col justify-between gap-4 p-5">
           {user.role === "client" && (
-            <div className="sm:text-right">
-              <p className="text-xs text-muted-foreground">Client code</p>
-              <p className="font-mono text-sm tracking-wide">{user.clientCode}</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Client code</p>
+              <p className="mt-1 font-mono text-lg font-bold break-all">{user.clientCode}</p>
             </div>
           )}
           <ThemeToggle />
         </div>
         {user.role === "client" && (
-          <div className="flex items-center gap-3 rounded-xl bg-muted px-4 py-3 text-sm sm:col-span-2">
-            <UserRoundCheck className="size-5 shrink-0 text-muted-foreground" />
+          <div className="flex items-center gap-3 bg-muted px-5 py-4 text-sm sm:col-span-2">
+            <UserRoundCheck className="size-5 shrink-0" aria-hidden="true" />
             {coach ? (
               <span>
-                Coached by <span className="font-medium">{coach.fullName || coach.username}</span> ({coach.email}). They can see your meals, targets and recipes.
+                Coached by <span className="font-bold">{coach.fullName || coach.username}</span> ({coach.email}). They can see your meals, targets and recipes.
               </span>
             ) : (
               <span className="text-muted-foreground">No coach linked. Share your email and client code with a coach to let them follow your progress.</span>

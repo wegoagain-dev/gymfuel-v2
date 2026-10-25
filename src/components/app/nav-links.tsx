@@ -23,21 +23,21 @@ function useActive() {
   return (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 }
 
+// Desktop: each destination is a cell in the slab, ruled on both sides; the current one fills yellow under its ink.
 export function NavLinks({ role }: { role: Role }) {
   const isActive = useActive()
   return (
-    <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-      {items(role).map(({ href, label, icon: Icon }) => (
+    <nav className="hidden items-stretch md:flex" aria-label="Main">
+      {items(role).map(({ href, label }) => (
         <Link
           key={href}
           href={href}
           aria-current={isActive(href) ? "page" : undefined}
           className={cn(
-            "inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-            isActive(href) && "bg-muted text-foreground"
+            "-ml-[3px] inline-flex items-center border-x-3 border-foreground px-5 text-sm font-bold whitespace-nowrap text-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground",
+            isActive(href) && "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
           )}
         >
-          <Icon className="size-4" />
           {label}
         </Link>
       ))}
@@ -51,7 +51,7 @@ export function MobileDock({ role }: { role: Role }) {
   return (
     <nav
       aria-label="Main"
-      className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 px-2 pt-1.5 backdrop-blur-xl md:hidden"
+      className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t-3 border-foreground bg-background md:hidden"
     >
       <div className="grid" style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }}>
         {links.map(({ href, short, icon: Icon }) => (
@@ -60,11 +60,11 @@ export function MobileDock({ role }: { role: Role }) {
             href={href}
             aria-current={isActive(href) ? "page" : undefined}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-lg py-1.5 text-[11px] font-medium text-muted-foreground",
-              isActive(href) && "text-primary"
+              "flex min-h-14 flex-col items-center justify-center gap-1 border-l border-foreground text-xs font-bold text-foreground first:border-l-0 active:bg-primary active:text-primary-foreground",
+              isActive(href) && "bg-accent text-accent-foreground"
             )}
           >
-            <Icon className="size-5" />
+            <Icon className="size-5" aria-hidden="true" />
             {short}
           </Link>
         ))}

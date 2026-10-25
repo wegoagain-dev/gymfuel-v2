@@ -22,11 +22,11 @@ export default async function GroceriesPage({ searchParams }: PageProps<"/grocer
     <div className="flex flex-col gap-6">
       <PageHeader title="Groceries" description="Keep track of what's in your kitchen, turn it into meals, and plan the next shop." />
       <Tabs defaultValue={tab} className="gap-6">
-        <TabsList className="h-10">
+        <TabsList>
           <TabsTrigger value="kitchen" className="px-4"><PackageOpen /> Kitchen &amp; AI</TabsTrigger>
           <TabsTrigger value="shopping" className="px-4">
             <ShoppingBasket /> Shopping list
-            <span className="tabular ml-1 rounded-full bg-muted px-1.5 text-xs">{groceries.filter((item) => !item.checked).length}</span>
+            <span className="tabular ml-1 border border-current px-1.5 text-xs">{groceries.filter((item) => !item.checked).length}</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="kitchen">

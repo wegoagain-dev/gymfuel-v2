@@ -46,12 +46,13 @@ function expiry(today: string, date: string | null): { status: Status; label: st
   return { status: days <= 3 ? "urgent" : days <= 6 ? "soon" : "fresh", label }
 }
 
+// Urgency prints in ink weight and fill, never in a second hue: urgent is a solid ink tag, soon a yellow fill.
 const STATUS_STYLE: Record<Status, { badge: string; text: string; name: string }> = {
-  expired: { badge: "bg-destructive/15 text-destructive", text: "text-destructive", name: "Urgent" },
-  urgent: { badge: "bg-destructive/15 text-destructive", text: "text-destructive", name: "Urgent" },
-  soon: { badge: "bg-warning/20 text-foreground", text: "text-foreground", name: "Soon" },
-  fresh: { badge: "bg-success/15 text-success", text: "text-muted-foreground", name: "Fresh" },
-  none: { badge: "bg-muted text-muted-foreground", text: "text-muted-foreground", name: "No expiry" },
+  expired: { badge: "bg-primary text-primary-foreground", text: "font-bold text-foreground", name: "Urgent" },
+  urgent: { badge: "bg-primary text-primary-foreground", text: "font-bold text-foreground", name: "Urgent" },
+  soon: { badge: "bg-accent text-accent-foreground", text: "text-foreground", name: "Soon" },
+  fresh: { badge: "bg-background text-foreground", text: "text-muted-foreground", name: "Fresh" },
+  none: { badge: "border-muted-foreground bg-background text-muted-foreground", text: "text-muted-foreground", name: "No expiry" },
 }
 
 export function ShoppingList({ items, today }: { items: Item[]; today: string }) {
@@ -93,21 +94,21 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="grid flex-1 grid-cols-4 gap-2 sm:max-w-lg">
+        <dl className="cells flex-1 grid-cols-4 sm:max-w-xl">
           {(
             [
-              ["Urgent", counts.urgent, "text-destructive"],
-              ["Soon", counts.soon, "text-foreground"],
-              ["Fresh", counts.fresh, "text-success"],
-              ["No expiry", counts.none, "text-muted-foreground"],
+              ["Urgent", counts.urgent, "bg-primary text-primary-foreground"],
+              ["Soon", counts.soon, ""],
+              ["Fresh", counts.fresh, ""],
+              ["No expiry", counts.none, ""],
             ] as const
           ).map(([label, count, tone]) => (
-            <div key={label} className="rounded-xl border bg-card px-3 py-2">
-              <p className={cn("tabular text-xl font-semibold", tone)}>{count}</p>
-              <p className="text-[11px] text-muted-foreground">{label}</p>
+            <div key={label} className={cn("flex flex-col-reverse px-3 py-2.5", tone)}>
+              <dt className="text-sm">{label}</dt>
+              <dd className="figure-xl text-4xl">{count}</dd>
             </div>
           ))}
-        </div>
+        </dl>
         <Button onClick={() => setEditing("new")}>
           <Plus data-icon="inline-start" /> Add item
         </Button>
@@ -122,22 +123,23 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
       )}
 
       {optimistic.length ? (
-        <ul className="easyui flex flex-col divide-y overflow-hidden rounded-2xl border bg-card">
+        <ul className="easyui box flex flex-col divide-y divide-foreground bg-card">
           {optimistic.map((item) => {
             const { status, label } = expiry(today, item.expirationDate)
             const style = STATUS_STYLE[status]
             return (
-              <li key={item.id} className={cn("flex items-center gap-3 px-4 py-3", item.checked && "bg-muted/40")}>
+              <li key={item.id} className={cn("flex items-center gap-3 px-4 py-3 hover:bg-muted", item.checked && "bg-muted")}>
                 <DrawCheckbox
                   checked={item.checked}
                   onChange={(event) => toggle(item, event.target.checked)}
                   aria-label={item.checked ? `Mark ${item.name} as still needed` : `Mark ${item.name} as in the basket`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className={cn("truncate font-medium", item.checked && "text-muted-foreground line-through")}>{item.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="tabular">{item.quantity}</span> {item.unit} · {item.category ?? "Other"}
-                    {item.expirationDate && <span className={cn("ml-2 font-medium", style.text)}>{label}</span>}
+                  <p className={cn("truncate font-bold", item.checked && "text-muted-foreground line-through")}>{item.name}</p>
+                  <p className="flex flex-wrap gap-x-4 text-sm text-muted-foreground">
+                    <span><span className="tabular">{item.quantity}</span> {item.unit}</span>
+                    <span>{item.category ?? "Other"}</span>
+                    {item.expirationDate && <span className={style.text}>{label}</span>}
                   </p>
                 </div>
                 <Badge variant="secondary" className={cn("hidden sm:inline-flex", style.badge)}>{style.name}</Badge>
@@ -156,7 +158,7 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
           })}
         </ul>
       ) : (
-        <Empty className="rounded-2xl border border-dashed">
+        <Empty className="box bg-muted">
           <EmptyHeader>
             <EmptyMedia variant="icon"><ShoppingBasket /></EmptyMedia>
             <EmptyTitle>Your list is empty</EmptyTitle>

@@ -8,7 +8,6 @@ import { addPantryIngredient, generateFromPantry, removePantryIngredient } from 
 import { MealEditorDialog, type MealEditorState } from "@/components/meals/meal-editor-dialog"
 import { GeneratedRecipeCard } from "@/components/recipes/generated-recipe-card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -67,11 +66,11 @@ export function KitchenPanel({ ingredients, defaultGoal, aiMode }: { ingredients
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <section aria-labelledby="kitchen-title" className="rounded-2xl border bg-card p-5 md:p-6">
-          <div className="flex items-center justify-between">
-            <h2 id="kitchen-title" className="font-semibold">In your kitchen</h2>
-            <Badge variant="secondary" className="tabular">{optimistic.length}</Badge>
+      <div className="cells grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <section aria-labelledby="kitchen-title" className="bg-card p-5 md:p-6">
+          <div className="flex items-end justify-between gap-4">
+            <h2 id="kitchen-title" className="display text-3xl">In your kitchen</h2>
+            <p className="figure-xl text-4xl" aria-label={`${optimistic.length} items`}>{optimistic.length}</p>
           </div>
           <form
             className="mt-4 flex gap-2"
@@ -88,26 +87,26 @@ export function KitchenPanel({ ingredients, defaultGoal, aiMode }: { ingredients
           {optimistic.length ? (
             <ul className="mt-4 flex flex-wrap gap-2">
               {optimistic.map((ingredient) => (
-                <li key={ingredient.id} className="inline-flex h-9 items-center gap-1 rounded-full border bg-background pr-1 pl-3.5 text-sm">
+                <li key={ingredient.id} className="inline-flex h-9 items-center gap-1 border border-foreground bg-background pr-1 pl-3 text-sm font-bold">
                   {ingredient.name}
-                  <Button variant="ghost" size="icon-xs" className="rounded-full" onClick={() => remove(ingredient)} aria-label={`Remove ${ingredient.name}`}>
+                  <Button variant="ghost" size="icon-xs" className="rounded-none" onClick={() => remove(ingredient)} aria-label={`Remove ${ingredient.name}`}>
                     <X />
                   </Button>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="mt-4 flex flex-col items-center gap-2 rounded-xl border border-dashed py-8 text-center text-sm text-muted-foreground">
+            <div className="mt-4 flex flex-col items-center gap-2 bg-muted py-8 text-center text-sm text-muted-foreground">
               <PackageOpen className="size-6" />
               Add what you have so ideas use it first.
             </div>
           )}
         </section>
 
-        <section aria-labelledby="generate-title" className="flex flex-col gap-4 rounded-2xl border bg-card p-5 md:p-6">
+        <section aria-labelledby="generate-title" className="flex flex-col gap-4 bg-muted p-5 md:p-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 id="generate-title" className="flex items-center gap-2 font-semibold">
-              <WandSparkles className="size-4 text-primary" /> Generate gym meals
+            <h2 id="generate-title" className="display flex items-center gap-3 text-3xl">
+              <WandSparkles className="size-6 shrink-0" strokeWidth={2.5} aria-hidden="true" /> Generate gym meals
             </h2>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/profile"><SlidersHorizontal data-icon="inline-start" /> Preferences</Link>
@@ -115,11 +114,11 @@ export function KitchenPanel({ ingredients, defaultGoal, aiMode }: { ingredients
           </div>
           <Field>
             <FieldLabel>Goal</FieldLabel>
-            <ToggleGroup type="single" variant="outline" value={goal} onValueChange={(value) => value && setGoal(value as FitnessGoal)} className="w-full">
+            <ToggleGroup type="single" variant="outline" spacing={0} value={goal} onValueChange={(value) => value && setGoal(value as FitnessGoal)} className="w-full">
               {GOALS.map((item) => (
-                <ToggleGroupItem key={item.value} value={item.value} className="h-auto flex-1 flex-col gap-0 py-2">
-                  <span className="text-sm font-medium">{item.label}</span>
-                  <span className="text-[11px] text-muted-foreground">{item.note}</span>
+                <ToggleGroupItem key={item.value} value={item.value} className="h-auto flex-1 flex-col gap-0 py-3">
+                  <span className="display text-xl">{item.label}</span>
+                  <span className="text-xs font-normal">{item.note}</span>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -133,11 +132,11 @@ export function KitchenPanel({ ingredients, defaultGoal, aiMode }: { ingredients
               </SelectContent>
             </Select>
           </Field>
-          <Button size="lg" className="mt-auto h-11" onClick={generate} disabled={generating}>
+          <Button size="lg" className="mt-auto" onClick={generate} disabled={generating}>
             {generating ? <Spinner data-icon="inline-start" /> : <WandSparkles data-icon="inline-start" />}
             {generating ? "Building three recipes…" : "Generate three recipes"}
           </Button>
-          {aiMode === "demo" && <p className="text-xs text-muted-foreground">Demo AI is on (no OpenAI key) — recipes come from a built-in template.</p>}
+          {aiMode === "demo" && <p className="text-sm text-muted-foreground">Demo AI is on (no OpenAI key), so recipes come from a built-in template.</p>}
         </section>
       </div>
 
@@ -149,17 +148,15 @@ export function KitchenPanel({ ingredients, defaultGoal, aiMode }: { ingredients
 
       {generating ? (
         <div className="grid gap-4 lg:grid-cols-3">
-          {[0, 1, 2].map((key) => <Skeleton key={key} className="h-80 rounded-2xl" />)}
+          {[0, 1, 2].map((key) => <Skeleton key={key} className="h-80 rounded-none" />)}
         </div>
       ) : recipes.length ? (
-        <section aria-labelledby="ideas-title" className="flex flex-col gap-3">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 id="ideas-title" className="text-lg font-semibold">Fresh ideas</h2>
-              <p className="text-xs text-muted-foreground">Nutrition is estimated per serving. Green dots are already in your kitchen.</p>
-            </div>
+        <section aria-labelledby="ideas-title" className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+            <h2 id="ideas-title" className="display text-3xl md:text-4xl">Fresh ideas</h2>
+            <p className="text-sm text-muted-foreground">Nutrition is estimated per serving. Ticked ingredients are already in your kitchen.</p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="cells grid-cols-1 lg:grid-cols-3">
             {recipes.map((recipe) => (
               <GeneratedRecipeCard
                 key={recipe.title}

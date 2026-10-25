@@ -34,7 +34,7 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
   )
 
   return (
-    <form onSubmit={action} className="rounded-2xl border bg-card p-5 md:p-6">
+    <form onSubmit={action} className="box bg-card p-5 md:p-6">
       <FieldGroup>
         {state && !state.ok && (
           <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>
@@ -71,9 +71,9 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
               <Select name="fitnessGoal" defaultValue={defaults.fitnessGoal}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cut">Cut — lighter meals</SelectItem>
-                  <SelectItem value="maintain">Maintain — balanced</SelectItem>
-                  <SelectItem value="bulk">Bulk — denser meals</SelectItem>
+                  <SelectItem value="cut">Cut, lighter meals</SelectItem>
+                  <SelectItem value="maintain">Maintain, balanced</SelectItem>
+                  <SelectItem value="bulk">Bulk, denser meals</SelectItem>
                 </SelectContent>
               </Select>
             </Field>

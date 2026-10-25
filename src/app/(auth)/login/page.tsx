@@ -9,26 +9,29 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Sign in to log meals and check today&apos;s targets.</p>
+        <h1 className="display text-5xl">Welcome back</h1>
+        <p className="mt-3 text-muted-foreground">Sign in to log meals and check today&apos;s targets.</p>
       </div>
       <Suspense>
         <LoginForm />
       </Suspense>
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         New to GymFuel?{" "}
-        <Link href="/register" className="font-medium text-foreground underline underline-offset-4">
+        <Link href="/register" className="ink-link font-bold">
           Create an account
         </Link>
       </p>
       {process.env.NODE_ENV !== "production" && (
-        <div className="rounded-xl border border-dashed p-4 text-xs leading-relaxed text-muted-foreground">
-          <p className="font-medium text-foreground">Local demo accounts</p>
-          <p className="mt-1">
-            <code>alex@gymfuel.test</code> (client, full data) · <code>coach@gymfuel.test</code> (coach) ·{" "}
-            <code>sam@gymfuel.test</code> (unlinked client, code <code>5A3D9C1E7B2F4A60</code>)
-          </p>
-          <p className="mt-1">
+        <div className="bg-muted p-4 text-sm leading-relaxed">
+          <p className="font-bold">Local demo accounts</p>
+          <ul className="mt-2 flex flex-col gap-1 text-muted-foreground">
+            <li><code className="text-foreground">alex@gymfuel.test</code> (client, full data)</li>
+            <li><code className="text-foreground">coach@gymfuel.test</code> (coach)</li>
+            <li>
+              <code className="text-foreground">sam@gymfuel.test</code> (unlinked client, code <code className="text-foreground">5A3D9C1E7B2F4A60</code>)
+            </li>
+          </ul>
+          <p className="mt-2 text-muted-foreground">
             Password for all: <code>GymFuel123</code>
           </p>
         </div>

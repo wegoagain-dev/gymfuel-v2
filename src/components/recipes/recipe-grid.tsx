@@ -35,34 +35,35 @@ export function RecipeGrid({ recipes }: { recipes: RecipeSummary[] }) {
       </InputGroup>
 
       {visible.length ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="cells grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((recipe) => (
-            <li key={recipe.id}>
+            <li key={recipe.id} className="flex">
               <Link
                 href={`/recipes/${recipe.id}`}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-lg focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                className="group flex w-full flex-col bg-card focus-visible:outline-offset-[-5px]"
               >
-                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-accent to-muted">
+                <div className="relative aspect-[16/9] overflow-hidden border-b-3 border-foreground bg-muted">
                   {recipe.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element -- remote recipe photos of unknown size
-                    <img src={recipe.imageUrl} alt="" loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={recipe.imageUrl} alt="" loading="lazy" className="size-full object-cover" />
                   ) : (
-                    <ChefHat className="absolute inset-0 m-auto size-10 text-accent-foreground/40" />
+                    <ChefHat className="absolute inset-0 m-auto size-10" aria-hidden="true" />
                   )}
                   {recipe.difficulty && (
-                    <Badge className="absolute top-3 left-3 bg-background/85 text-foreground capitalize backdrop-blur">{recipe.difficulty}</Badge>
+                    <Badge variant="secondary" className="absolute top-0 left-0 h-7 border-0 border-r border-b border-foreground px-2.5 capitalize">{recipe.difficulty}</Badge>
                   )}
                 </div>
-                <div className="flex flex-1 flex-col p-4">
-                  <h2 className="line-clamp-1 font-semibold">{recipe.title}</h2>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{recipe.description || "No description yet."}</p>
-                  <div className="tabular mt-auto flex items-center gap-3 pt-4 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-accent px-2 py-1 font-semibold text-accent-foreground">
-                      {Math.round(recipe.protein ?? 0)} g protein
-                    </span>
-                    {recipe.calories ? <span>{Math.round(recipe.calories)} kcal</span> : null}
+                <div className="flex flex-1 flex-col gap-1 p-4 group-hover:bg-accent group-hover:text-accent-foreground group-active:bg-primary group-active:text-primary-foreground">
+                  <h2 className="line-clamp-1 text-lg font-black">{recipe.title}</h2>
+                  <p className="line-clamp-2 text-sm">{recipe.description || "No description yet."}</p>
+                  <div className="mt-auto flex items-end gap-4 pt-4 text-sm">
+                    <p className="flex items-baseline gap-1.5">
+                      <span className="figure-xl text-4xl">{Math.round(recipe.protein ?? 0)}g</span>
+                      <span className="font-bold">protein</span>
+                    </p>
+                    {recipe.calories ? <span className="tabular">{Math.round(recipe.calories)} kcal</span> : null}
                     {recipe.minutes ? (
-                      <span className="ml-auto inline-flex items-center gap-1"><Clock className="size-3.5" />{recipe.minutes} min</span>
+                      <span className="tabular ml-auto inline-flex items-center gap-1"><Clock className="size-3.5" aria-hidden="true" />{recipe.minutes} min</span>
                     ) : null}
                   </div>
                 </div>
@@ -71,7 +72,7 @@ export function RecipeGrid({ recipes }: { recipes: RecipeSummary[] }) {
           ))}
         </ul>
       ) : (
-        <Empty className="rounded-2xl border border-dashed">
+        <Empty className="box bg-muted">
           <EmptyHeader>
             <EmptyMedia variant="icon"><ChefHat /></EmptyMedia>
             <EmptyTitle>{recipes.length ? "No recipes match" : "No recipes yet"}</EmptyTitle>

@@ -21,7 +21,7 @@ export function RecipeForm({ recipe }: { recipe?: Recipe }) {
   const invalid = (name: string) => Boolean(errors[name]) || undefined
 
   return (
-    <form onSubmit={action} className="rounded-2xl border bg-card p-5 md:p-6">
+    <form onSubmit={action} className="box bg-card p-5 md:p-6">
       <FieldGroup>
         {state && !state.ok && (
           <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>

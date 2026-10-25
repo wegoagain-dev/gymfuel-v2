@@ -1,20 +1,32 @@
+/* Hallmark · shape: Map / Diagram (/), app screen (/today, /meals, /recipes, /groceries, /profile, /coach) · genre: editorial · theme: Brutal (deal 1/3, seed meal-macro-tracker-people-3405·c4e9d3ef·2026-10-25·r0) · redesign: full · draw: b5b929
+ * hero: Stage (/, /login, /register) · nav: banner over a bar (/), slab bar (app) · footer: mast · imagery: screenshots 2 (capture.mjs), photographs 1 (/login, /register) · signature: the day's macros as 900-weight numbers in shared-rule cells; on /, the gym-to-kitchen loop as one boxed diagram
+ * job: sign up · axes: light/grotesk-heavy/chromatic-yellow · posture: committed · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 · weakest: E, forty shadcn primitives carried their own rings, radii and fades; squared, ruled and stilled them at the source so every screen inherits the sheet */
+/* Hallmark · swapped draw b5b929 hero Counter for Stage · the sign-up form lives on /register and the strongest real thing is the Lens review screen */
+/* Hallmark · swapped draw b5b929 sections (code sample, pricing table, Pinned run) for the loop diagram and a Showcase · GymFuel has no code to show and no prices, it is free while in development */
+/* Hallmark · dropped the hero mock card figures "640 kcal", "46 g protein", "48 g carbs" and the 08:10, 13:05, 19:20 timeline · they were a drawn mock of the product (84); the real Lens review and a real day from the meal history replace them */
+/* Hallmark · dismissed F18 · "field-label" is a shadcn data-slot on the sign-in form labels, not a Hallmark picture slot */
+/* Hallmark · dismissed 77 · /login and /register are form screens with no sections, the Stage hero is the whole page */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./tokens.css";
+@import "./base.css" layer(base);
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-display);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-heading: var(--font-display);
+  --color-signal: var(--color-accent);
+  --color-signal-ink: var(--color-accent-ink);
   --color-kcal: var(--kcal);
   --color-protein: var(--protein);
   --color-carbs: var(--carbs);
   --color-fat: var(--fat);
-  --color-success: var(--success);
   --color-warning: var(--warning);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -45,94 +57,59 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 }
 
+/* shadcn's names, pointed at the Brutal sheet. Primary is the ink fill; shadcn's "accent" (its hover and
+   selection surface) is the one yellow, which only ever fills under ink. Light and dark both follow the
+   tokens, which re-derive under .dark in tokens.css. */
 :root {
-  --background: oklch(0.985 0.003 106);
-  --foreground: oklch(0.2 0.012 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.012 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.012 260);
-  --primary: oklch(0.56 0.16 150);
-  --primary-foreground: oklch(0.99 0.01 150);
-  --secondary: oklch(0.955 0.006 106);
-  --secondary-foreground: oklch(0.25 0.012 260);
-  --muted: oklch(0.955 0.006 106);
-  --muted-foreground: oklch(0.5 0.012 260);
-  --accent: oklch(0.95 0.03 150);
-  --accent-foreground: oklch(0.3 0.08 150);
-  --destructive: oklch(0.577 0.215 27.3);
-  --border: oklch(0.91 0.006 106);
-  --input: oklch(0.89 0.006 106);
-  --ring: oklch(0.56 0.16 150);
-  --kcal: oklch(0.7 0.17 50);
-  --protein: oklch(0.6 0.15 160);
-  --carbs: oklch(0.66 0.13 240);
-  --fat: oklch(0.68 0.15 345);
-  --success: oklch(0.6 0.15 155);
-  --warning: oklch(0.75 0.15 75);
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-paper);
+  --secondary: var(--color-paper-2);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper-2);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-accent-ink);
+  --destructive: var(--color-error);
+  --border: var(--color-rule);
+  --input: var(--color-rule);
+  --ring: var(--color-focus);
+  --success: var(--color-success);
+  --warning: var(--color-accent);
+  /* Macros print in the ink family: protein is the ink itself, carbs and fat step toward the paper,
+     calories take the yellow fill. Never a second hue. */
+  --protein: var(--color-ink);
+  --carbs: var(--color-muted);
+  --fat: var(--color-paper-3);
+  --kcal: var(--color-accent);
   --chart-1: var(--protein);
   --chart-2: var(--carbs);
   --chart-3: var(--fat);
   --chart-4: var(--kcal);
-  --chart-5: oklch(0.55 0.02 260);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.98 0.003 106);
-  --sidebar-foreground: oklch(0.2 0.012 260);
-  --sidebar-primary: oklch(0.56 0.16 150);
-  --sidebar-primary-foreground: oklch(0.99 0.01 150);
-  --sidebar-accent: oklch(0.95 0.006 106);
-  --sidebar-accent-foreground: oklch(0.2 0.012 260);
-  --sidebar-border: oklch(0.91 0.006 106);
-  --sidebar-ring: oklch(0.56 0.16 150);
-}
-
-.dark {
-  --background: oklch(0.155 0.008 260);
-  --foreground: oklch(0.96 0.004 106);
-  --card: oklch(0.195 0.01 260);
-  --card-foreground: oklch(0.96 0.004 106);
-  --popover: oklch(0.21 0.01 260);
-  --popover-foreground: oklch(0.96 0.004 106);
-  --primary: oklch(0.8 0.18 145);
-  --primary-foreground: oklch(0.2 0.05 150);
-  --secondary: oklch(0.25 0.01 260);
-  --secondary-foreground: oklch(0.96 0.004 106);
-  --muted: oklch(0.24 0.01 260);
-  --muted-foreground: oklch(0.7 0.01 260);
-  --accent: oklch(0.28 0.04 150);
-  --accent-foreground: oklch(0.9 0.08 145);
-  --destructive: oklch(0.7 0.19 22);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.8 0.18 145);
-  --kcal: oklch(0.78 0.16 55);
-  --protein: oklch(0.78 0.15 160);
-  --carbs: oklch(0.76 0.12 240);
-  --fat: oklch(0.76 0.14 345);
-  --success: oklch(0.78 0.16 150);
-  --warning: oklch(0.82 0.15 80);
-  --chart-1: var(--protein);
-  --chart-2: var(--carbs);
-  --chart-3: var(--fat);
-  --chart-4: var(--kcal);
-  --chart-5: oklch(0.6 0.02 260);
-  --sidebar: oklch(0.18 0.01 260);
-  --sidebar-foreground: oklch(0.96 0.004 106);
-  --sidebar-primary: oklch(0.8 0.18 145);
-  --sidebar-primary-foreground: oklch(0.2 0.05 150);
-  --sidebar-accent: oklch(0.25 0.01 260);
-  --sidebar-accent-foreground: oklch(0.96 0.004 106);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.8 0.18 145);
+  --chart-5: var(--color-ink-2);
+  --radius: 0;
+  --sidebar: var(--color-paper-2);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-ink);
+  --sidebar-primary-foreground: var(--color-paper);
+  --sidebar-accent: var(--color-accent);
+  --sidebar-accent-foreground: var(--color-accent-ink);
+  --sidebar-border: var(--color-rule);
+  --sidebar-ring: var(--color-focus);
 }
 
 /* Tokens the EasyUI components expect, mapped onto the shadcn theme. */
@@ -145,7 +122,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
@@ -156,6 +133,73 @@
   html {
     @apply font-sans;
   }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  :disabled, [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /* The display voice: Libre Franklin 900 in tight capitals, for heads, the wordmark and a figure that is a cell's whole content. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+  /* A figure set big in its cell. */
+  .figure-xl {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-display);
+    line-height: 0.9;
+  }
+  /* Cells that share their rules: one 3px box, neighbours overlap by a rule so no seam doubles. */
+  .cells {
+    display: grid;
+    /* Only top and left: each cell's own right and bottom rules make the outer edge, so no side doubles. */
+    border-top: var(--rule-bar) solid var(--color-rule);
+    border-left: var(--rule-bar) solid var(--color-rule);
+  }
+  .cells > * {
+    min-width: 0;
+    margin: calc(var(--rule-bar) * -1) 0 0 calc(var(--rule-bar) * -1);
+    border: var(--rule-bar) solid var(--color-rule);
+  }
+  .box {
+    border: var(--rule-bar) solid var(--color-rule);
+  }
+  .rule-top {
+    border-top: var(--rule-bar) solid var(--color-rule);
+  }
+  .rule-bottom {
+    border-bottom: var(--rule-bar) solid var(--color-rule);
+  }
+  .ink-well {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  /* Links in running text: ink, underlined; hover fills yellow under the ink in one frame. */
+  .ink-link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+  .ink-link:hover {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+  .ink-link:active {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
 }
 
 @layer utilities {
@@ -163,6 +207,34 @@
     font-variant-numeric: tabular-nums;
   }
   .pb-safe {
-    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+    padding-bottom: max(env(safe-area-inset-bottom), var(--space-sm));
   }
+}
+
+/* Toasts sit on the sheet like any other box: a 3px rule, no float. */
+[data-sonner-toast] {
+  border-width: var(--rule-bar) !important;
+  box-shadow: none !important;
+}
+
+@layer components {
+  /* The page container (Tailwind's own .container utility would override base.css): capped, centred, gutters grow past 1440. */
+  .page-wrap {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  .section-pad {
+    padding-block: var(--section-gap);
+  }
+  .section-pad-s {
+    padding-block: var(--section-gap-s);
+  }
+}
+
+/* On an ink surface the olive ring disappears, so focus there takes the paper colour, which inverts with the mode.
+   Unlayered so it outranks the utilities. */
+:is(.bg-primary, .ink-well) :focus-visible {
+  outline-color: var(--color-paper);
 }
