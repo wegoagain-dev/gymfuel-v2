@@ -1,180 +1,87 @@
 # GymFuel v2
 
-A from-scratch rebuild of [GymFuel](https://gymfuel.xyz): photograph meals and confirm
-AI-estimated macros, track calories and protein against your own targets, turn the food in your
-kitchen into high-protein recipes, keep a shopping list with expiry warnings, and let a coach
-follow linked clients.
+Photograph a meal, confirm the AI's macro estimate, and track calories and protein against your
+own targets. Turn the food in your kitchen into high-protein recipes, keep a shopping list with
+expiry warnings, and let a coach follow linked clients.
 
-Built with **Next.js 16** (App Router, Server Components, Server Actions), **TypeScript**,
-**Tailwind CSS v4**, **shadcn/ui** (Radix), a few **EasyUI** components, **Drizzle ORM** and
-**Postgres**.
+Next.js 16 (App Router, Server Components, Server Actions), TypeScript, Tailwind v4, shadcn/ui,
+Drizzle ORM, Postgres. Local dev runs on PGlite, so there is nothing to install.
 
-> Status: deployed to the homelab K3s cluster by Argo CD (see Deploying below). GitHub is the
-> source of truth: `main` builds the image, `homelab-k8s` says which image runs.
+> Deployed to the homelab K3s cluster by Argo CD. GitHub is the source of truth: `main` builds the
+> image, `homelab-k8s` says which image runs.
 
-## Run it locally
+## Run it
 
-Requirements: Node.js 20.9+ (tested with Node 26) and npm. You don't need Docker or a
-Postgres install.
+Node 20.9+. No Docker, no Postgres install.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000. On first start the app creates an embedded Postgres database
-(PGlite) in `./.data/pglite`, applies the migrations, and loads demo data.
+http://localhost:3000. The first start creates `./.data/pglite`, applies the migrations and loads
+demo data.
 
 ### Demo accounts
 
-All demo accounts use the password `GymFuel123`.
+Password `GymFuel123` for all three.
 
-| Email | Role | What it has |
-| --- | --- | --- |
-| `alex@gymfuel.test` | client | Targets, 7 days of meals, recipes, kitchen items, a shopping list. Coached by Jo. |
-| `coach@gymfuel.test` | coach | Linked to Alex, so you can try the Clients area |
-| `sam@gymfuel.test` | client | Not linked. Link Sam as the coach with client code `5A3D9C1E7B2F4A60` |
+| Email | Role |
+| --- | --- |
+| `alex@gymfuel.test` | client: targets, a week of meals, recipes, kitchen items, a shopping list |
+| `coach@gymfuel.test` | coach, linked to Alex |
+| `sam@gymfuel.test` | client, unlinked. Link with client code `5A3D9C1E7B2F4A60` |
 
-You can also register a new account at `/register`.
-
-### Useful scripts
+### Scripts
 
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Dev server on :3000 |
-| `npm run db:seed` | **Deletes all data** and reloads the demo data. With PGlite, stop `npm run dev` first, because only one process can open the database |
+| `npm run db:seed` | Deletes all data and reloads the demo data. Stop `npm run dev` first: one process per PGlite database |
 | `npm run db:migrate` | Applies pending migrations (the app also does this on start) |
-| `npm run db:generate` | Creates a new SQL migration in `./drizzle` after you edit `src/db/schema.ts` |
-| `npm run db:studio` | Drizzle Studio, a database browser (needs `DATABASE_URL` set to a Postgres server) |
-| `npm run typecheck` / `npm run lint` / `npm run build` | Checks |
+| `npm run db:generate` | New SQL migration in `./drizzle` after editing `src/db/schema.ts` |
+| `npm run db:studio` | Drizzle Studio, needs a real `DATABASE_URL` |
+| `npm run typecheck` / `lint` / `build` | Checks |
 
-### Using real Postgres instead of PGlite
+### Real Postgres instead of PGlite
 
 ```bash
 docker compose up -d
-echo 'DATABASE_URL=postgres://gymfuel:gymfuel@localhost:5432/gymfuel' >> .env.local
+echo 'DATABASE_URL=postgres://gymfuel:***@localhost:5432/gymfuel' >> .env.local
 npm run dev
 ```
 
-Any Postgres 14+ works, including the `gymfuel-postgres` pattern used in the homelab.
+Any Postgres 14+, including the in-cluster `gymfuel-postgres`.
 
-### Turning on real AI
+### Real AI
 
-Without an API key, the AI features run in **demo mode**:
-- **Lens** can't see the photo. It builds a draft from the portion notes you type (for
-  example "250g chicken, 150g rice") using a small nutrition table. You can also use
-  "Use notes only" without a photo.
-- **Pick a meal for me** and **Generate three recipes** come from templates that use your
-  kitchen items, goal, meal type, dietary needs and dislikes.
+Without `OPENAI_API_KEY` the AI runs in demo mode: Lens drafts from the portion notes you type,
+and "Pick a meal for me" and "Generate three recipes" come from templates. Set `OPENAI_API_KEY` in
+`.env.local`; `OPENAI_MEAL_ANALYSIS_MODEL`, `OPENAI_RECIPE_MODEL` and `UNSPLASH_ACCESS_KEY` are
+optional.
 
-To use OpenAI, as the old app did, copy `.env.example` to `.env.local` and set
-`OPENAI_API_KEY`. You can also set `OPENAI_MEAL_ANALYSIS_MODEL` and `OPENAI_RECIPE_MODEL`;
-their defaults are the model names the old backend used. Set `UNSPLASH_ACCESS_KEY` to give
-new recipes a stock photo.
-
-## How it's put together
+## Structure
 
 ```
 src/
-  app/
-    page.tsx                 landing page (static)
-    (auth)/login, register   sign-in / sign-up
-    (app)/                   signed-in area: today, meals, groceries, recipes, profile, coach
-    actions/                 Server Actions (all writes), one file per area
-    api/lens/analyze         photo upload → AI draft (multipart, so a Route Handler)
-    api/health               liveness + DB check (for k8s probes later)
-    api/auth/clear           clears a stale session cookie
-  db/
-    schema.ts                Drizzle schema (the data model)
-    connect.ts               PGlite or Postgres, chosen from DATABASE_URL, plus migrations
-    seed.ts                  demo data
-  lib/
-    auth/session.ts          signed JWT in an httpOnly cookie
-    auth/dal.ts              getCurrentUser / requireUser / requireCoach
-    data.ts                  read queries (always scoped to the signed-in user)
-    ai/                      OpenAI calls + offline demo generator
-    validation.ts            zod schemas shared by actions and AI output
-  components/
-    ui/                      shadcn/ui + EasyUI components (owned source)
-    today, meals, groceries, recipes, coach, profile, app/
-drizzle/                     SQL migrations
+  app/          routes: /, (auth), (app), actions/, api/
+  db/           schema.ts, connect.ts (PGlite or Postgres), seed.ts
+  lib/          auth/, data.ts (read queries), ai/, validation.ts
+  components/   ui/ (shadcn and EasyUI, owned source) plus one folder per area
+drizzle/        SQL migrations
 ```
 
-### Why one Next.js app instead of Next.js + FastAPI
-
-The old app had three moving parts: Next.js, FastAPI and Postgres. A thin client called a
-REST API, and the JWT lived in `localStorage`. v2 folds the API into Next.js:
-
-- **Reads** run in Server Components, which query Postgres directly through Drizzle.
-- **Writes** are Server Actions, so there's no hand-written fetch/axios layer or API client.
-- **Auth** is an httpOnly, signed session cookie, so page JavaScript can't read the token.
-  Every action and query re-checks the session through `lib/auth/dal.ts`.
-- **Postgres** stays. The schema is plain Postgres (`serial`, `jsonb`, `timestamptz`), so it
-  runs against the existing kind of Postgres deployment. PGlite is the same Postgres compiled
-  to WASM, used only so local setup is `npm install && npm run dev`.
-
-The cost: one deployment instead of two, and the Cloudflare route `^/api(/|$)` → backend
-would no longer be needed. Under v2, `/api/*` is served by Next.js itself.
-
-## Old app → v2
-
-The full inventory of the old app is in [docs/FEATURE_INVENTORY.md](docs/FEATURE_INVENTORY.md).
-
-| Area | Old app | v2 |
-| --- | --- | --- |
-| Landing | Hero + preview cards | Same idea, plus a features section; light **and** dark theme |
-| Auth | Modal; register (client/coach) → auto-login; JWT in localStorage | Dedicated `/login` + `/register` pages; same password rules; httpOnly cookie session; deep-link `?next=` |
-| Today | Calories/protein vs targets, Lens photo → confirm, "Pick a meal for me", today's meals | All of that, plus a macro donut, an "over target" state, and editing meals from Today |
-| My Meals | Search, favourites, edit, log again, delete | Same, grouped by day with daily totals |
-| Groceries | Kitchen list + AI recipes; shopping list with expiry status | Same. Shopping list items can also be ticked off |
-| Recipes | Search, add (name/protein/description/ingredients/tags), delete | Same, plus a **recipe detail page**, **edit**, full macros/times/difficulty/method, and **"Log this meal"** |
-| Profile | Dialog: targets + AI preferences | `/profile` page with the same fields, plus your coach and the theme |
-| Coach | Link/unlink by email + client code; client's *planned meals* + recipes | Link/unlink the same way; client view shows **meals actually logged** in the last 7 days, a protein-vs-target chart, and recipes |
-| Mobile | Bottom dock | Bottom dock |
-
-**Changed on purpose**
-- The coach view uses logged meals instead of the old meal-planner table. Clients could no
-  longer add planned meals, so coaches always saw "No meals planned yet".
-- Clients' recipes, and saved AI recipes, can now be opened and read. Before, there was no
-  detail view.
-
-**Not carried over** (none of these had any UI in the old app)
-- The meal planner (`/api/meals`, "generate week").
-- The Gemini recipe endpoints.
-- The WebSocket "family sync" and the `families` table.
-- Guest/localStorage mode.
-- Bulk grocery import.
-
-Any of them can come back if you want them.
-
-## EasyUI
-
-[EasyUI](https://easyui.site) is an MIT-licensed registry of animated React components, built
-on Tailwind and Framer Motion, that installs through the shadcn CLI, for example
-`npx shadcn@latest add Surajmaurya1/easyui/donut-chart`. This app uses three of them:
-
-- `animated-number`: the rolling calorie and protein totals on Today
-- `donut-chart`: today's macro split
-- `draw-checkbox`: ticking items off the shopping list
-
-Notes for when you add more:
-- EasyUI ships its own `utils.ts`, `badge.tsx`, `alert.tsx` and `sheet.tsx`. Answer **No**
-  when the CLI asks to overwrite shadcn's files.
-- Its components expect a few CSS variables (`--accent`, `--surface-raised`, …). These are
-  mapped onto the shadcn theme by the `.easyui` class in `globals.css`.
-- `animated-number.tsx` has two small, commented edits (`GymFuel tweak`): theme colour
-  instead of hard-coded white, and screen-reader text.
+Reads run in Server Components through `lib/data.ts`, always scoped to the signed-in user. Writes
+are Server Actions in `src/app/actions/`. Auth is a signed JWT in an httpOnly cookie, and every
+action and query re-checks the session in `lib/auth/dal.ts`.
 
 ## Deploying
 
-1. **Image.** Every push to `main` runs `.github/workflows/image.yml`: type check, lint, then a
-   Docker build (`Dockerfile`, Next.js `standalone` output plus `./drizzle`) pushed to
-   `ghcr.io/wegoagain-dev/gymfuel:<short sha>` and `:main`. Pull requests build without pushing.
-2. **Release.** In [`homelab-k8s`](https://github.com/wegoagain-dev/homelab-k8s), set
-   `apps/gymfuel/kustomization.yaml` `images[].newTag` to the new short sha and push. Argo CD
-   syncs it; roll back by reverting that commit.
-3. **Runtime config** (from the `gymfuel-app-secret` SealedSecret and the Deployment):
-   `DATABASE_URL` (the `gymfuel_v2` database on the in-cluster Postgres), `SESSION_SECRET`
-   (32+ chars), `OPENAI_API_KEY`, `SEED_DEMO_DATA=false`. Migrations run on first connection.
-4. **Sign-in limits.** `src/lib/rate-limit.ts` allows 20 sign-in tries per IP and 5 per email every
-   15 minutes, and 5 sign-ups per IP an hour. It's in memory, so it assumes one replica.
+1. Push to `main`. `.github/workflows/image.yml` type checks, lints and builds
+   `ghcr.io/wegoagain-dev/gymfuel:<short sha>` and `:main`.
+2. Set `apps/gymfuel/kustomization.yaml` `images[].newTag` in `homelab-k8s` to that sha. Argo CD
+   syncs it; roll back by reverting the commit.
+3. Runtime config comes from the `gymfuel-app-secret` SealedSecret: `DATABASE_URL`,
+   `SESSION_SECRET`, `OPENAI_API_KEY`, `SEED_DEMO_DATA=false`.
+4. Sign-in is rate limited in `src/lib/rate-limit.ts`: 20 tries per IP and 5 per email per 15
+   minutes, 5 sign-ups per IP per hour. It is in memory, so it assumes one replica.
