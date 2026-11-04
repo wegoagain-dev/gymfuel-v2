@@ -47,9 +47,9 @@ export function UserMenu({ user }: { user: PublicUser }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-10 gap-2 rounded-full pr-3 pl-1" aria-label="Account menu">
+          <Button variant="ghost" className="h-10 gap-2 rounded-full pr-1 pl-1 sm:pr-3" aria-label="Account menu">
             <Avatar className="size-8">
-              <AvatarFallback className="bg-accent text-xs font-semibold text-accent-foreground">{initialsOf(name)}</AvatarFallback>
+              <AvatarFallback className="bg-signal-soft text-xs font-medium text-ink">{initialsOf(name)}</AvatarFallback>
             </Avatar>
             <span className="hidden max-w-28 truncate text-sm sm:inline">{user.username}</span>
           </Button>
@@ -57,18 +57,18 @@ export function UserMenu({ user }: { user: PublicUser }) {
         <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuLabel className="flex flex-col gap-1 py-2">
             <span className="flex items-center justify-between gap-2">
-              <span className="truncate text-sm font-semibold text-foreground">{name}</span>
+              <span className="truncate text-sm font-medium text-foreground">{name}</span>
               <Badge variant="secondary" className="capitalize">{user.role}</Badge>
             </span>
             <span className="truncate text-xs font-normal text-muted-foreground">{user.email}</span>
           </DropdownMenuLabel>
           {user.role === "client" && (
-            <div className="mx-1 mb-1 rounded-lg bg-muted px-2.5 py-2">
-              <p className="text-xs text-muted-foreground">Client code — share it with your coach</p>
+            <div className="tray mx-1 mb-1 px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Client code. Share it with your coach</p>
               <button
                 type="button"
                 onClick={copyCode}
-                className="mt-1 flex w-full items-center justify-between gap-2 font-mono text-sm tracking-wide"
+                className="rx mt-1 flex w-full items-center justify-between gap-2 rounded-md text-sm"
                 aria-label="Copy client code"
               >
                 {user.clientCode}

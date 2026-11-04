@@ -8,8 +8,8 @@ export async function AppNav() {
   const user = toPublicUser(await requireUser())
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:px-6">
+      <header className="pt-safe sticky top-0 z-40 border-b bg-background">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4 md:h-[72px] md:px-6">
           <Logo href="/today" />
           <NavLinks role={user.role} />
           <div className="ml-auto">
@@ -24,8 +24,8 @@ export async function AppNav() {
 
 export function AppNavSkeleton() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:px-6">
+    <header className="pt-safe sticky top-0 z-40 border-b bg-background">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4 md:h-[72px] md:px-6">
         <Logo href="/today" />
         <Skeleton className="ml-auto size-9 rounded-full" />
       </div>

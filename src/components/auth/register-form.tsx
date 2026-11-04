@@ -33,7 +33,7 @@ export function RegisterForm() {
             <ToggleGroupItem value="coach" className="flex-1"><Users /> Coach</ToggleGroupItem>
           </ToggleGroup>
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))]">
           <Field data-invalid={Boolean(errors.fullName) || undefined}>
             <FieldLabel htmlFor="fullName">Full name</FieldLabel>
             <Input id="fullName" name="fullName" autoComplete="name" defaultValue={state?.values?.fullName} {...field("fullName")} />
@@ -59,7 +59,7 @@ export function RegisterForm() {
           <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required {...field("confirmPassword")} />
           <FieldError>{errors.confirmPassword}</FieldError>
         </Field>
-        <Button type="submit" size="lg" className="h-10" disabled={pending}>
+        <Button type="submit" size="lg" className="mt-1" disabled={pending}>
           {pending && <Spinner data-icon="inline-start" />} Create account
         </Button>
       </FieldGroup>

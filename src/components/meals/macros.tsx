@@ -3,44 +3,35 @@ import { cn } from "@/lib/utils"
 export type Macros = { calories: number; protein: number; carbs: number; fat: number }
 
 const ITEMS = [
-  { key: "calories", label: "kcal", unit: "", dot: "bg-kcal" },
-  { key: "protein", label: "protein", unit: "g", dot: "bg-protein" },
-  { key: "carbs", label: "carbs", unit: "g", dot: "bg-carbs" },
-  { key: "fat", label: "fat", unit: "g", dot: "bg-fat" },
+  { key: "calories", label: "kcal", unit: "", tint: "plastic--tue" },
+  { key: "protein", label: "protein", unit: "\u00a0g", tint: "plastic--thu" },
+  { key: "carbs", label: "carbs", unit: "\u00a0g", tint: "plastic--fri" },
+  { key: "fat", label: "fat", unit: "\u00a0g", tint: "plastic--sun" },
 ] as const
 
-/** Four compact macro tiles (kcal, protein, carbs, fat). */
+/** Four small plastic compartments (kcal, protein, carbs, fat). */
 export function MacroGrid({ macros, className }: { macros: Macros; className?: string }) {
   return (
-    <div className={cn("grid grid-cols-4 gap-1.5", className)}>
-      {ITEMS.map(({ key, label, unit, dot }) => (
-        <div key={key} className="rounded-lg bg-muted/70 px-2.5 py-2">
-          <p className="tabular text-sm font-semibold">
+    <dl className={cn("grid grid-cols-4 gap-1.5", className)}>
+      {ITEMS.map(({ key, label, unit, tint }) => (
+        <div key={key} className={cn("plastic flex flex-col-reverse rounded-[10px] px-2.5 py-2", tint)}>
+          <dt className="mt-0.5 text-xs text-ink-2">{label}</dt>
+          <dd className="rx text-sm font-medium text-ink">
             {Math.round(macros[key])}
             {unit}
-          </p>
-          <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-            <span className={cn("size-1.5 rounded-full", dot)} />
-            {label}
-          </p>
+          </dd>
         </div>
       ))}
-    </div>
+    </dl>
   )
 }
 
-/** Inline "640 kcal · 46 g protein" text. */
+/** Inline "640 kcal   46 g protein" in the pharmacy-label voice. */
 export function MacroLine({ calories, protein, className }: { calories: number; protein: number; className?: string }) {
   return (
-    <span className={cn("tabular inline-flex items-center gap-3 text-xs text-muted-foreground", className)}>
-      <span className="inline-flex items-center gap-1">
-        <span className="size-1.5 rounded-full bg-kcal" />
-        {Math.round(calories)} kcal
-      </span>
-      <span className="inline-flex items-center gap-1">
-        <span className="size-1.5 rounded-full bg-protein" />
-        {Math.round(protein)} g protein
-      </span>
+    <span className={cn("rx inline-flex items-center gap-3 text-xs text-muted-foreground", className)}>
+      <span>{Math.round(calories).toLocaleString("en-GB")}&nbsp;kcal</span>
+      <span>{Math.round(protein).toLocaleString("en-GB")}&nbsp;g protein</span>
     </span>
   )
 }

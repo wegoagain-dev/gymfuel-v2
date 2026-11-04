@@ -57,11 +57,13 @@ export function RecipeActions({ recipe }: { recipe: { id: number; title: string;
     })
 
   return (
-    <div className="flex shrink-0 gap-2">
-      <Button onClick={logIt}><Utensils data-icon="inline-start" /> Log this meal</Button>
+    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+      <Button onClick={logIt} className="flex-1 focus-visible:outline-offset-2 sm:flex-none">
+        <Utensils data-icon="inline-start" /> Log this meal
+      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" aria-label="More recipe actions"><MoreHorizontal /></Button>
+          <Button variant="outline" size="icon" aria-label="More recipe actions" className="focus-visible:outline-offset-2"><MoreHorizontal /></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild><Link href={`/recipes/${recipe.id}/edit`}><Pencil /> Edit</Link></DropdownMenuItem>

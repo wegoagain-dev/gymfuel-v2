@@ -13,7 +13,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
       <Suspense fallback={<AppNavSkeleton />}>
         <AppNav />
       </Suspense>
-      <main className="mx-auto max-w-6xl px-4 pt-6 pb-28 md:px-6 md:pt-8 md:pb-16">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 pt-6 pb-[calc(var(--dock-height)+env(safe-area-inset-bottom)+2rem)] md:px-6 md:pt-10 md:pb-20">{children}</main>
     </div>
   )
 }

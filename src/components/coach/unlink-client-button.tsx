@@ -38,7 +38,12 @@ export function UnlinkClientButton({ clientId, name, redirectTo, withLabel }: { 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant={withLabel ? "outline" : "ghost"} size={withLabel ? "default" : "icon"} aria-label={`Unlink ${name}`}>
+        <Button
+          variant={withLabel ? "outline" : "ghost"}
+          size={withLabel ? "default" : "icon"}
+          className={withLabel ? "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal" : "shrink-0 text-muted-foreground hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"}
+          aria-label={`Unlink ${name}`}
+        >
           <Unlink data-icon={withLabel ? "inline-start" : undefined} />
           {withLabel && "Unlink"}
         </Button>

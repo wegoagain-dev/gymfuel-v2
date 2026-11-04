@@ -1,145 +1,137 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Camera, ChefHat, Dumbbell, Flame, PackageOpen, Sparkles, Users } from "lucide-react"
+import { Camera, ChefHat, Flame, PackageOpen, Users } from "lucide-react"
 import { Logo } from "@/components/app/logo"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const FEATURES = [
   {
     icon: Camera,
+    tint: "plastic--thu",
     title: "Log with Lens",
-    body: "Snap your plate. AI drafts the foods, portions and macros — you review and confirm before anything counts.",
+    body: "Snap your plate. AI drafts the foods, portions and macros; you review and confirm before anything counts.",
   },
   {
     icon: Flame,
+    tint: "plastic--tue",
     title: "Today at a glance",
-    body: "Calories and protein against targets you set, plus a one-tap “pick a meal for me” when you're stuck.",
+    body: "Calories and protein against targets you set, plus a one-tap \u201cpick a meal for me\u201d when you\u2019re stuck.",
   },
   {
     icon: PackageOpen,
+    tint: "plastic--fri",
     title: "Cook from your kitchen",
     body: "List what you have, pick cut, maintain or bulk, and get three high-protein recipes that use it first.",
   },
   {
     icon: Users,
+    tint: "plastic--sat",
     title: "Built for coaches",
-    body: "Clients share a private code. Coaches see what was actually eaten against each client's targets.",
+    body: "Clients share a private code. Coaches see what was actually eaten against each client\u2019s targets.",
   },
-]
-
-const TIMELINE = [
-  { time: "08:10", title: "Protein overnight oats", note: "520 kcal · 42 g protein" },
-  { time: "13:05", title: "Chicken rice power bowl", note: "690 kcal · 56 g protein" },
-  { time: "19:20", title: "Salmon grain bowl", note: "Draft ready to review" },
 ]
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+      <header className="pt-safe sticky top-0 z-40 border-b bg-background">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 md:h-[72px] md:px-6">
           <Logo />
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-2" aria-label="Account">
             <Button variant="ghost" asChild>
               <Link href="/login">Sign in</Link>
             </Button>
-            <Button asChild>
-              <Link href="/register">Get started</Link>
+            <Button variant="outline" className="hidden sm:inline-flex" asChild>
+              <Link href="/register">Create account</Link>
             </Button>
           </nav>
         </div>
       </header>
 
       <main className="flex-1">
-        <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 md:px-6 md:py-20 lg:grid-cols-[1fr_1.05fr]">
-          <div className="flex flex-col items-start gap-6">
-            <Badge variant="secondary" className="gap-1.5 rounded-full px-3 py-1">
-              <Dumbbell className="size-3.5" /> Daily nutrition, made practical
-            </Badge>
-            <h1 className="text-5xl font-semibold tracking-tight text-balance md:text-6xl">
-              See your meal.
-              <span className="block text-primary">Shape your next one.</span>
-            </h1>
-            <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
-              Photograph meals, confirm estimated macros, and turn your groceries into gym-focused recipes.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="h-11 px-5 text-base" asChild>
-                <Link href="/register">
-                  Create free account <ArrowRight data-icon="inline-end" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="h-11 px-5 text-base" asChild>
-                <Link href="/login">I have an account</Link>
-              </Button>
-            </div>
+        <section className="relative overflow-hidden">
+          <div className="window-light" aria-hidden="true">
+            <span style={{ left: "8%", top: "-10%" }} />
+            <span style={{ left: "34%", top: "-18%" }} />
+            <span style={{ left: "62%", top: "-6%" }} />
+            <span style={{ left: "86%", top: "-14%" }} />
           </div>
-
-          <div className="relative">
-            <div className="relative aspect-[4/3.4] overflow-hidden rounded-3xl border shadow-2xl shadow-primary/10">
-              <Image
-                src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1400&auto=format&fit=crop&q=70"
-                alt="A salmon and grain bowl"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/10 to-transparent" />
-              <div className="absolute inset-x-0 top-0 p-6 text-white">
-                <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-white/70 uppercase">
-                  <Sparkles className="size-3.5" /> Lens draft · estimate
-                </p>
-                <p className="mt-2 max-w-xs text-2xl font-semibold">Review the meal before it counts.</p>
-                <div className="mt-4 flex flex-wrap gap-2 text-sm">
-                  <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">640 kcal</span>
-                  <span className="rounded-full bg-emerald-400/25 px-3 py-1 text-emerald-50 backdrop-blur">46 g protein</span>
-                  <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">48 g carbs</span>
-                </div>
+          <div className="relative mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] items-center gap-12 px-4 pt-12 pb-16 md:px-6 md:pt-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:pb-20">
+            <div className="flex flex-col items-start gap-6">
+              <h1 className="display max-w-[15ch] text-[2.75rem] md:text-[4rem]">
+                See your meal.
+                <br />
+                Shape your next one.
+              </h1>
+              <p className="max-w-md text-lg text-ink-2">
+                Photograph meals, confirm estimated macros, and turn your groceries into gym-focused recipes.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button size="lg" asChild>
+                  <Link href="/register">Create free account</Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/login">I have an account</Link>
+                </Button>
               </div>
             </div>
-            <div className="absolute -bottom-8 -left-4 hidden w-72 rounded-2xl border bg-card/95 p-4 shadow-xl backdrop-blur sm:block md:-left-8">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Today</p>
-              <ul className="mt-3 flex flex-col gap-2.5">
-                {TIMELINE.map((item) => (
-                  <li key={item.time} className="flex items-start gap-3">
-                    <span className="tabular mt-0.5 text-xs text-muted-foreground">{item.time}</span>
-                    <span>
-                      <span className="block text-sm font-medium">{item.title}</span>
-                      <span className="block text-xs text-muted-foreground">{item.note}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+
+            <div className="relative mx-auto flex w-full max-w-[520px] items-end justify-center gap-4">
+              <figure className="w-[56%] shrink-0 overflow-hidden rounded-[28px] shadow-(--shadow-lift)">
+                <Image
+                  src="/screens/today-phone.png"
+                  alt="GymFuel Today screen: protein, calories, carbs and fat as filling compartments"
+                  width={780}
+                  height={1688}
+                  priority
+                  sizes="(max-width: 1024px) 56vw, 300px"
+                />
+              </figure>
+              <figure className="mb-10 hidden w-[44%] shrink-0 overflow-hidden rounded-[24px] shadow-(--shadow-lift) min-[420px]:block">
+                <Image
+                  src="/screens/lens-phone.png"
+                  alt="A Lens estimate open for review before it is saved"
+                  width={780}
+                  height={1688}
+                  sizes="(max-width: 1024px) 44vw, 230px"
+                />
+              </figure>
             </div>
           </div>
         </section>
 
-        <section className="border-t bg-muted/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-            <h2 className="max-w-xl text-3xl font-semibold tracking-tight">Everything between the gym and the kitchen.</h2>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURES.map(({ icon: Icon, title, body }) => (
-                <div key={title} className="rounded-2xl border bg-card p-5">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                    <Icon className="size-5" />
-                  </span>
-                  <h3 className="mt-4 font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                </div>
+        <section className="border-t bg-paper-2" aria-labelledby="features">
+          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 md:px-6 md:py-24">
+            <h2 id="features" className="display max-w-xl text-[2rem] md:text-[2.75rem]">Everything between the gym and the kitchen.</h2>
+            <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-12">
+              {FEATURES.map(({ icon: Icon, tint, title, body }, index) => (
+                <li
+                  key={title}
+                  className={cn(
+                    "plastic flex flex-col gap-10 p-6 md:p-8",
+                    tint,
+                    index === 0 || index === 3 ? "md:col-span-7" : "md:col-span-5"
+                  )}
+                >
+                  <Icon className="size-6 text-ink" aria-hidden="true" />
+                  <div className="flex flex-col gap-2">
+                    <h3 className="display text-2xl text-ink">{title}</h3>
+                    <p className="max-w-md text-ink-2">{body}</p>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-foreground p-8 text-background md:flex-row md:items-center md:p-10">
-            <div>
-              <h2 className="text-3xl font-semibold tracking-tight">Start with your next meal.</h2>
-              <p className="mt-2 text-background/70">Free while in development. Your photos are never stored.</p>
+        <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-8 text-paper [--color-focus:var(--color-accent-soft)] md:flex-row md:items-center md:p-12">
+            <div className="flex flex-col gap-2">
+              <h2 className="display text-[2rem] md:text-[2.75rem]">Start with your next meal.</h2>
+              <p className="text-signal-soft">Free while in development. Your photos are never stored.</p>
             </div>
-            <Button size="lg" variant="secondary" className="h-11 px-5 text-base" asChild>
+            <Button size="lg" asChild>
               <Link href="/register">
                 <ChefHat data-icon="inline-start" /> Open GymFuel
               </Link>
@@ -150,7 +142,7 @@ export default function LandingPage() {
 
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-sm text-muted-foreground md:flex-row md:justify-between md:px-6">
-          <span>© GymFuel</span>
+          <span>&copy; GymFuel</span>
           <span>Nutrition values are estimates, not medical advice.</span>
         </div>
       </footer>

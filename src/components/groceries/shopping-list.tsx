@@ -16,7 +16,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DrawCheckbox } from "@/components/ui/draw-checkbox"
@@ -42,16 +41,8 @@ function expiry(today: string, date: string | null): { status: Status; label: st
   const days = daysUntil(today, date)
   if (days < 0) return { status: "expired", label: days === -1 ? "Expired yesterday" : `Expired ${-days} days ago` }
   const label = days === 0 ? "Expires today" : days === 1 ? "Expires tomorrow" : `Expires in ${days} days`
-  // Same thresholds as before: ≤3 days urgent, 4–6 soon, later fresh.
+  // Same thresholds as before: 3 days or fewer urgent, 4 to 6 soon, later fresh.
   return { status: days <= 3 ? "urgent" : days <= 6 ? "soon" : "fresh", label }
-}
-
-const STATUS_STYLE: Record<Status, { badge: string; text: string; name: string }> = {
-  expired: { badge: "bg-destructive/15 text-destructive", text: "text-destructive", name: "Urgent" },
-  urgent: { badge: "bg-destructive/15 text-destructive", text: "text-destructive", name: "Urgent" },
-  soon: { badge: "bg-warning/20 text-foreground", text: "text-foreground", name: "Soon" },
-  fresh: { badge: "bg-success/15 text-success", text: "text-muted-foreground", name: "Fresh" },
-  none: { badge: "bg-muted text-muted-foreground", text: "text-muted-foreground", name: "No expiry" },
 }
 
 export function ShoppingList({ items, today }: { items: Item[]; today: string }) {
@@ -70,6 +61,9 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
     },
     { urgent: 0, soon: 0, fresh: 0, none: 0 }
   )
+  const inBasket = optimistic.filter((item) => item.checked).length
+  const toBuy = optimistic.length - inBasket
+  const usedUp = optimistic.filter((item) => expiry(today, item.expirationDate).status === "expired").length
 
   const toggle = (item: Item, checked: boolean) =>
     startTransition(async () => {
@@ -90,57 +84,63 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
     })
   }
 
+  const stats: { label: string; value: number }[] = [
+    { label: "To buy", value: toBuy },
+    { label: "In basket", value: inBasket },
+    { label: "Used up", value: usedUp },
+  ]
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="grid flex-1 grid-cols-4 gap-2 sm:max-w-lg">
-          {(
-            [
-              ["Urgent", counts.urgent, "text-destructive"],
-              ["Soon", counts.soon, "text-foreground"],
-              ["Fresh", counts.fresh, "text-success"],
-              ["No expiry", counts.none, "text-muted-foreground"],
-            ] as const
-          ).map(([label, count, tone]) => (
-            <div key={label} className="rounded-xl border bg-card px-3 py-2">
-              <p className={cn("tabular text-xl font-semibold", tone)}>{count}</p>
-              <p className="text-[11px] text-muted-foreground">{label}</p>
-            </div>
-          ))}
-        </div>
-        <Button onClick={() => setEditing("new")}>
+        <h2 className="display min-w-0 text-xl">Shopping list</h2>
+        <Button variant="outline" onClick={() => setEditing("new")}>
           <Plus data-icon="inline-start" /> Add item
         </Button>
       </div>
 
+      <dl aria-label="Shopping progress" className="tray grid grid-cols-[repeat(3,minmax(0,1fr))] divide-x divide-rule">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex min-w-0 flex-col-reverse items-center gap-0.5 px-2 py-2.5">
+            <dt className="text-center text-xs text-muted-foreground">{stat.label}</dt>
+            <dd className="rx text-lg text-ink">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+
       {counts.urgent > 0 && (
-        <Alert variant="destructive">
-          <AlertTriangle />
+        <Alert className="border-rule bg-paper-2">
+          <AlertTriangle className="text-muted-foreground" />
           <AlertTitle>{counts.urgent} item{counts.urgent === 1 ? "" : "s"} to use up soon</AlertTitle>
           <AlertDescription>Expired or expiring within 3 days.</AlertDescription>
         </Alert>
       )}
 
       {optimistic.length ? (
-        <ul className="easyui flex flex-col divide-y overflow-hidden rounded-2xl border bg-card">
+        <ul className="tray flex min-w-0 flex-col divide-y divide-rule overflow-hidden">
           {optimistic.map((item) => {
-            const { status, label } = expiry(today, item.expirationDate)
-            const style = STATUS_STYLE[status]
+            const { label } = expiry(today, item.expirationDate)
             return (
-              <li key={item.id} className={cn("flex items-center gap-3 px-4 py-3", item.checked && "bg-muted/40")}>
+              <li
+                key={item.id}
+                className={cn(
+                  "flex min-w-0 items-center gap-2 px-2 py-2 transition-colors duration-(--dur-micro) sm:px-3",
+                  item.checked ? "bg-signal-soft/60" : "hover:bg-paper-3/50"
+                )}
+              >
                 <DrawCheckbox
                   checked={item.checked}
                   onChange={(event) => toggle(item, event.target.checked)}
                   aria-label={item.checked ? `Mark ${item.name} as still needed` : `Mark ${item.name} as in the basket`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className={cn("truncate font-medium", item.checked && "text-muted-foreground line-through")}>{item.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="tabular">{item.quantity}</span> {item.unit} · {item.category ?? "Other"}
-                    {item.expirationDate && <span className={cn("ml-2 font-medium", style.text)}>{label}</span>}
+                  <p className={cn("truncate font-medium", item.checked ? "text-muted-foreground" : "text-ink")}>{item.name}</p>
+                  <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                    <span className="rx text-ink-2">{item.quantity} {item.unit ?? "piece"}</span>
+                    <span>{item.category ?? "Other"}</span>
+                    <span>{item.expirationDate ? label : "No expiry"}</span>
                   </p>
                 </div>
-                <Badge variant="secondary" className={cn("hidden sm:inline-flex", style.badge)}>{style.name}</Badge>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon-sm" aria-label={`More actions for ${item.name}`}><MoreHorizontal /></Button>
@@ -156,7 +156,7 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
           })}
         </ul>
       ) : (
-        <Empty className="rounded-2xl border border-dashed">
+        <Empty className="tray">
           <EmptyHeader>
             <EmptyMedia variant="icon"><ShoppingBasket /></EmptyMedia>
             <EmptyTitle>Your list is empty</EmptyTitle>
@@ -168,7 +168,7 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
         </Empty>
       )}
 
-      <GroceryDialog item={editing} onClose={() => setEditing(null)} />
+      <GroceryDialog item={editing === "new" ? "new" : editing} onClose={() => setEditing(null)} />
 
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
@@ -193,7 +193,7 @@ function GroceryDialog({ item, onClose }: { item: Item | "new" | null; onClose: 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{existing ? "Edit item" : "Add to shopping list"}</DialogTitle>
-          <DialogDescription>Add an expiry date to get a heads-up before it goes off.</DialogDescription>
+          <DialogDescription>An expiry date gives you a heads-up before it goes off.</DialogDescription>
         </DialogHeader>
         {item && <GroceryForm key={existing?.id ?? "new"} item={existing} onDone={onClose} />}
       </DialogContent>
@@ -214,50 +214,52 @@ function GroceryForm({ item, onDone }: { item: Item | null; onDone: () => void }
 
   return (
     <form onSubmit={action}>
-      <FieldGroup>
-        <Field data-invalid={Boolean(errors.name) || undefined}>
-          <FieldLabel htmlFor="grocery-name">Item</FieldLabel>
-          <Input id="grocery-name" name="name" required maxLength={120} placeholder="e.g. Greek yoghurt" defaultValue={item?.name} aria-invalid={Boolean(errors.name) || undefined} />
-          <FieldError>{errors.name}</FieldError>
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field data-invalid={Boolean(errors.quantity) || undefined}>
-            <FieldLabel htmlFor="grocery-quantity">Quantity</FieldLabel>
-            <Input id="grocery-quantity" name="quantity" type="number" inputMode="decimal" min="0.01" step="any" required defaultValue={item?.quantity ?? 1} />
-            <FieldError>{errors.quantity}</FieldError>
+      <div className="tray flex flex-col gap-4 p-4">
+        <FieldGroup>
+          <Field data-invalid={Boolean(errors.name) || undefined}>
+            <FieldLabel htmlFor="grocery-name">Item</FieldLabel>
+            <Input id="grocery-name" name="name" required maxLength={120} placeholder="e.g. Greek yoghurt" defaultValue={item?.name} aria-invalid={Boolean(errors.name) || undefined} />
+            <FieldError>{errors.name}</FieldError>
           </Field>
-          <Field>
-            <FieldLabel>Unit</FieldLabel>
-            <Select name="unit" defaultValue={item?.unit ?? "piece"}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>{UNITS.map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field>
-            <FieldLabel>Category</FieldLabel>
-            <Select name="category" defaultValue={item?.category ?? "Other"}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field data-invalid={Boolean(errors.expirationDate) || undefined}>
-            <FieldLabel htmlFor="grocery-expiry">Expires</FieldLabel>
-            <Input id="grocery-expiry" name="expirationDate" type="date" defaultValue={item?.expirationDate ?? ""} />
-            <FieldError>{errors.expirationDate}</FieldError>
-          </Field>
-        </div>
-        {state && !state.ok && !Object.keys(errors).length && (
-          <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>
-        )}
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
-          <Button type="submit" disabled={pending}>
-            {pending && <Spinner data-icon="inline-start" />} {item ? "Save changes" : "Add item"}
-          </Button>
-        </DialogFooter>
-      </FieldGroup>
+          <div className="grid grid-cols-2 gap-3">
+            <Field data-invalid={Boolean(errors.quantity) || undefined}>
+              <FieldLabel htmlFor="grocery-quantity">Quantity</FieldLabel>
+              <Input id="grocery-quantity" name="quantity" type="number" inputMode="decimal" min="0.01" step="any" required defaultValue={item?.quantity ?? 1} />
+              <FieldError>{errors.quantity}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel>Unit</FieldLabel>
+              <Select name="unit" defaultValue={item?.unit ?? "piece"}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>{UNITS.map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field>
+              <FieldLabel>Category</FieldLabel>
+              <Select name="category" defaultValue={item?.category ?? "Other"}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+            <Field data-invalid={Boolean(errors.expirationDate) || undefined}>
+              <FieldLabel htmlFor="grocery-expiry">Expires</FieldLabel>
+              <Input id="grocery-expiry" name="expirationDate" type="date" defaultValue={item?.expirationDate ?? ""} />
+              <FieldError>{errors.expirationDate}</FieldError>
+            </Field>
+          </div>
+          {state && !state.ok && !Object.keys(errors).length && (
+            <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>
+          )}
+        </FieldGroup>
+      </div>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
+        <Button type="submit" disabled={pending}>
+          {pending && <Spinner data-icon="inline-start" />} {item ? "Save changes" : "Add item"}
+        </Button>
+      </DialogFooter>
     </form>
   )
 }

@@ -14,9 +14,9 @@ export interface DrawCheckboxProps
 }
 
 /**
- * DrawCheckbox — The checkmark draws itself (path length animation) and
- * settles with a tiny overshoot. The box also springs from 0.9 -> 1.02 -> 1.0
- * for a tactile "snap" feel.
+ * DrawCheckbox: the tick draws itself when the box is ticked. The box is 20px,
+ * the tap area is 40px. Checked fill is the signal green, the tick is the ink
+ * that sits on it. Calm, exact, no bounce.
  */
 export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
   (
@@ -50,12 +50,12 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
     return (
       <div
         className={cn(
-          'flex items-start gap-2.5 select-none',
-          disabled && 'opacity-30 cursor-not-allowed',
+          'flex items-center gap-2.5 select-none',
+          disabled && 'cursor-not-allowed opacity-40',
           className
         )}
       >
-        <div className="relative flex items-center justify-center mt-0.5">
+        <div className="relative flex items-center justify-center">
           <input
             ref={ref}
             id={inputId}
@@ -67,7 +67,6 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
             {...props}
           />
 
-          {/* Box: a tiny "pop" via scale 0.9 -> 1.04 -> 1.0 when checked */}
           <motion.div
             onClick={() => {
               if (disabled) return;
@@ -75,20 +74,22 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
               input?.click();
             }}
             initial={false}
-            animate={{
-              scale: showCheck ? [0.9, 1.04, 1] : 1,
-              backgroundColor: showCheck ? 'var(--accent)' : 'var(--surface-raised)',
-              borderColor: showCheck ? 'var(--accent)' : 'var(--border)',
-            }}
-            transition={{
-              // Use a keyframed spring-like array for the "settle" overshoot.
-              duration: 0.32,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="w-4 h-4 rounded-[4px] border flex items-center justify-center cursor-pointer focus-ring"
-            style={{ borderColor: showCheck ? 'var(--accent)' : 'var(--border)' }}
+            animate={{ scale: showCheck ? [0.94, 1] : 1 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className={cn(
+              'relative flex size-5 items-center justify-center rounded-[6px] border',
+              'cursor-pointer transition-colors duration-(--dur-micro) ease-(--ease-out)',
+              'active:brightness-[0.97]',
+              "after:absolute after:-inset-2.5 after:content-['']",
+              'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring',
+              'peer-disabled:cursor-not-allowed',
+              showCheck
+                ? 'border-signal bg-signal text-signal-ink'
+                : 'border-rule bg-surface text-ink',
+              disabled && 'cursor-not-allowed'
+            )}
           >
-            {/* Path-draw checkmark with overshoot on stroke-dashoffset */}
+            {/* Path-draw checkmark */}
             {currentChecked && !indeterminate && (
               <motion.svg
                 viewBox="0 0 16 16"
@@ -99,16 +100,12 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
                 strokeWidth="2.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-black dark:text-white stroke-black dark:stroke-white"
-                initial={{ pathLength: 0, scale: 0.6, opacity: 0 }}
-                animate={{
-                  pathLength: 1,
-                  scale: [0.6, 1.18, 1], // tiny overshoot
-                  opacity: 1,
-                }}
+                className="stroke-current"
+                initial={{ pathLength: 0, scale: 0.85, opacity: 0 }}
+                animate={{ pathLength: 1, scale: 1, opacity: 1 }}
                 transition={{
-                  pathLength: { duration: 0.28, ease: [0.65, 0, 0.35, 1] },
-                  scale: { duration: 0.36, ease: [0.16, 1, 0.3, 1] },
+                  pathLength: { duration: 0.22, ease: [0.65, 0, 0.35, 1] },
+                  scale: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
                   opacity: { duration: 0.12 },
                 }}
               >
@@ -116,10 +113,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
                   d="M3.5 8.5 L6.5 11.5 L12.5 5"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
-                  transition={{
-                    duration: 0.28,
-                    ease: [0.65, 0, 0.35, 1],
-                  }}
+                  transition={{ duration: 0.22, ease: [0.65, 0, 0.35, 1] }}
                 />
               </motion.svg>
             )}
@@ -131,7 +125,7 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
                 animate={{ scaleX: 1 }}
                 transition={motionTransitions.springSnappy}
                 style={{ transformOrigin: 'left center' }}
-                className="w-2.5 h-[2px] rounded-full bg-black dark:bg-white"
+                className="h-[2px] w-2.5 rounded-full bg-signal-ink"
               />
             )}
           </motion.div>
@@ -143,12 +137,12 @@ export const DrawCheckbox = forwardRef<HTMLInputElement, DrawCheckboxProps>(
             className={cn('cursor-pointer text-left', disabled && 'cursor-not-allowed')}
           >
             {label && (
-              <div className="text-xs font-medium text-[var(--text-primary)] leading-tight">
+              <div className="text-xs leading-tight font-medium text-ink">
                 {label}
               </div>
             )}
             {description && (
-              <div className="text-[11px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
+              <div className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                 {description}
               </div>
             )}

@@ -14,7 +14,7 @@ export default async function EditRecipePage({ params }: PageProps<"/recipes/[id
   const recipe = await getRecipe(user, Number(id))
   if (!recipe) notFound()
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader title="Edit recipe" />
       <RecipeForm recipe={recipe} />
     </div>

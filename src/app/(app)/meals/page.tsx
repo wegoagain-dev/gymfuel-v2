@@ -14,10 +14,17 @@ export default async function MealsPage() {
   const logs = await getMealHistory(user)
   const today = dayKey(tz, dayRange(tz).start)
   const yesterday = dayKey(tz, dayRange(tz, new Date(), -1).start)
+  const dayCount = new Set(logs.map((log) => dayKey(tz, log.eatenAt))).size
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="My Meals" description="Everything you've confirmed. Favourite the ones you eat often and log them again in one tap." />
+      <PageHeader title="My Meals" description="Every meal you've confirmed, grouped by day. Favourite the ones you eat often and log them again in one tap.">
+        {logs.length > 0 && (
+          <p className="rx text-sm text-muted-foreground">
+            {logs.length} meal{logs.length === 1 ? "" : "s"} over {dayCount} day{dayCount === 1 ? "" : "s"}
+          </p>
+        )}
+      </PageHeader>
       <MealHistory
         meals={logs.map((log) => {
           const key = dayKey(tz, log.eatenAt)
