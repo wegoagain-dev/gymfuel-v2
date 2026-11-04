@@ -61,9 +61,6 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
     },
     { urgent: 0, soon: 0, fresh: 0, none: 0 }
   )
-  const inBasket = optimistic.filter((item) => item.checked).length
-  const toBuy = optimistic.length - inBasket
-  const usedUp = optimistic.filter((item) => expiry(today, item.expirationDate).status === "expired").length
 
   const toggle = (item: Item, checked: boolean) =>
     startTransition(async () => {
@@ -85,9 +82,10 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
   }
 
   const stats: { label: string; value: number }[] = [
-    { label: "To buy", value: toBuy },
-    { label: "In basket", value: inBasket },
-    { label: "Used up", value: usedUp },
+    { label: "Urgent", value: counts.urgent },
+    { label: "Soon", value: counts.soon },
+    { label: "Fresh", value: counts.fresh },
+    { label: "No expiry", value: counts.none },
   ]
 
   return (
@@ -99,7 +97,7 @@ export function ShoppingList({ items, today }: { items: Item[]; today: string })
         </Button>
       </div>
 
-      <dl aria-label="Shopping progress" className="tray grid grid-cols-[repeat(3,minmax(0,1fr))] divide-x divide-rule">
+      <dl aria-label="Items by expiry" className="tray grid grid-cols-[repeat(4,minmax(0,1fr))] divide-x divide-rule">
         {stats.map((stat) => (
           <div key={stat.label} className="flex min-w-0 flex-col-reverse items-center gap-0.5 px-2 py-2.5">
             <dt className="text-center text-xs text-muted-foreground">{stat.label}</dt>
