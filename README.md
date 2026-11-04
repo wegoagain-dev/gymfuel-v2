@@ -9,8 +9,8 @@ Built with **Next.js 16** (App Router, Server Components, Server Actions), **Typ
 **Tailwind CSS v4**, **shadcn/ui** (Radix), a few **EasyUI** components, **Drizzle ORM** and
 **Postgres**.
 
-> Status: local only. Nothing here is deployed, and the live site, cluster and Cloudflare
-> setup are untouched.
+> Status: deployed to the homelab K3s cluster by Argo CD (see Deploying below). GitHub is the
+> source of truth: `main` builds the image, `homelab-k8s` says which image runs.
 
 ## Run it locally
 
@@ -165,9 +165,16 @@ Notes for when you add more:
 - `animated-number.tsx` has two small, commented edits (`GymFuel tweak`): theme colour
   instead of hard-coded white, and screen-reader text.
 
-## Notes for later (deploying)
+## Deploying
 
-- Set `SESSION_SECRET` (32+ chars) and `DATABASE_URL`, and set `SEED_DEMO_DATA=false`.
-- The `./drizzle` folder must ship next to the server, because migrations run on start.
-- There's no login rate limiting yet. Cloudflare's WAF or an app-level limiter should cover
-  that before going live.
+1. **Image.** Every push to `main` runs `.github/workflows/image.yml`: type check, lint, then a
+   Docker build (`Dockerfile`, Next.js `standalone` output plus `./drizzle`) pushed to
+   `ghcr.io/wegoagain-dev/gymfuel:<short sha>` and `:main`. Pull requests build without pushing.
+2. **Release.** In [`homelab-k8s`](https://github.com/wegoagain-dev/homelab-k8s), set
+   `apps/gymfuel/kustomization.yaml` `images[].newTag` to the new short sha and push. Argo CD
+   syncs it; roll back by reverting that commit.
+3. **Runtime config** (from the `gymfuel-app-secret` SealedSecret and the Deployment):
+   `DATABASE_URL` (the `gymfuel_v2` database on the in-cluster Postgres), `SESSION_SECRET`
+   (32+ chars), `OPENAI_API_KEY`, `SEED_DEMO_DATA=false`. Migrations run on first connection.
+4. **Sign-in limits.** `src/lib/rate-limit.ts` allows 20 sign-in tries per IP and 5 per email every
+   15 minutes, and 5 sign-ups per IP an hour. It's in memory, so it assumes one replica.

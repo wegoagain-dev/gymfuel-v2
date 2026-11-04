@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { getDb } from "@/db"
 import { users } from "@/db/schema"
 import { createSession, deleteSession } from "@/lib/auth/session"
+import { clientIp, hit, LIMITS, reset, waitMessage } from "@/lib/rate-limit"
 import { fieldErrors, firstError, loginSchema, registerSchema } from "@/lib/validation"
 import { fail, type ActionResult } from "./result"
 
@@ -22,12 +23,18 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   const values = { email: String(formData.get("email") ?? "") }
   if (!parsed.success) return { ...fail(firstError(parsed.error), fieldErrors(parsed.error)), values }
 
+  // Slow down password guessing: per visitor, and per account so a botnet can't hammer one email.
+  const emailKey = `login:email:${parsed.data.email.toLowerCase()}`
+  const limited = hit(`login:ip:${await clientIp()}`, LIMITS.loginPerIp) ?? hit(emailKey, LIMITS.loginPerEmail)
+  if (limited) return { ...fail(waitMessage(limited.retryAfterMs)), values }
+
   const db = await getDb()
   const [user] = await db.select().from(users).where(eq(users.email, parsed.data.email)).limit(1)
   // Same message for unknown email and wrong password, so accounts can't be probed.
   const valid = user && (await bcrypt.compare(parsed.data.password, user.passwordHash))
   if (!user || !valid) return { ...fail("Incorrect email or password"), values }
 
+  reset(emailKey)
   await createSession(user.id)
   redirect(safeNext(formData.get("next")))
 }
@@ -43,6 +50,9 @@ export async function register(_prev: AuthFormState, formData: FormData): Promis
   const parsed = registerSchema.safeParse(raw)
   if (!parsed.success) return { ...fail(firstError(parsed.error), fieldErrors(parsed.error)), values }
   const data = parsed.data
+
+  const limited = hit(`register:ip:${await clientIp()}`, LIMITS.registerPerIp)
+  if (limited) return { ...fail(waitMessage(limited.retryAfterMs)), values }
 
   const db = await getDb()
   const [taken] = await db
