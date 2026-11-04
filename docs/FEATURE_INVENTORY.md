@@ -1,9 +1,9 @@
 # GymFuel — feature inventory of the old app
 
-Source: `wegoagain-dev/ECS-GymFuel` @ `e0be1cc` (main, 2 Aug 2026), local clone
-`~/Desktop/projects/ecs-gymfuel` (identical to GitHub), cross-checked against
-https://gymfuel.xyz (the live landing page — "See Your Meal. Shape Your Next One." — is the
-post-"Lens revamp" version on `main`).
+Source of truth: GitHub, `wegoagain-dev/gymfuel-v2` (renamed from `ECS-GymFuel`) at commit
+`e0be1cc` (2 Aug 2026), the last version of the old app before the v2 rebuild. Cross-checked
+against https://gymfuel.xyz, whose live landing page ("See Your Meal. Shape Your Next One.")
+is that post-"Lens revamp" version.
 
 Stack: Next.js 16 single page (`src/app/page.tsx`, client-side tabs, Zustand store, JWT in
 `localStorage`) + FastAPI/SQLAlchemy + Postgres. AI via OpenAI (Lens) and Gemini (older
