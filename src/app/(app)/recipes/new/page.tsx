@@ -10,7 +10,7 @@ export const instant = false
 export default async function NewRecipePage() {
   await requireUser()
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader title="New recipe" description="Add protein and tags now so search and logging work better later." />
       <RecipeForm />
     </div>

@@ -18,7 +18,7 @@ import { motion, useSpring } from "framer-motion";
 /*  registry generator ships it as a shared `registry:lib` dependency.         */
 /* -------------------------------------------------------------------------- */
 
-export const CHART_COLORS = ["#6d7cff", "#34d1bf", "#ffb44c", "#ff6b8b", "#a78bfa", "#5ac8fa"];
+export const CHART_COLORS = ["var(--protein)", "var(--carbs)", "var(--kcal)", "var(--fat)", "var(--color-muted)", "var(--color-ink-2)"];
 
 export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 export const SPRING = { type: "spring", duration: 0.5, bounce: 0 } as const;
@@ -31,10 +31,10 @@ export const fullFmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1
 export const defaultFormat = (n: number) => fullFmt.format(n);
 export const defaultTick = (n: number) => compactFmt.format(n);
 
-export const ring = "ring-1 ring-black/[0.07] dark:ring-white/[0.07]";
-export const muted = "text-neutral-500";
+export const ring = "ring-1 ring-rule";
+export const muted = "text-muted-foreground";
 export const focus =
-  "outline-none focus-visible:ring-2 focus-visible:ring-neutral-400/70 dark:focus-visible:ring-white/40";
+  "focus-visible:outline-2 focus-visible:outline-(--color-focus)";
 
 // "Nice" step so that step × 4 covers `raw × 4`
 export function niceStep(raw: number) {
@@ -113,7 +113,7 @@ export function Tooltip({
     <motion.div
       ref={ref}
       aria-hidden
-      className={`pointer-events-none absolute left-0 top-0 z-20 min-w-[112px] rounded-xl bg-white/95 px-3 py-2 text-[12px] shadow-lg backdrop-blur dark:bg-neutral-900/95 ${ring}`}
+      className={`pointer-events-none absolute left-0 top-0 z-20 min-w-[112px] rounded-xl bg-surface px-3 py-2 text-xs shadow-(--shadow-lift) ${ring}`}
       style={{ x, y }}
       initial={false}
       animate={{ opacity: pos ? 1 : 0 }}
@@ -145,12 +145,11 @@ export function ChartCard({
 }) {
   return (
     <section
-      className={`min-w-0 rounded-[20px] bg-white p-4 text-neutral-700 dark:bg-[#0b0b0c] dark:text-neutral-300 sm:p-5 ${ring} ${className}`}
-      style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 24px 48px -32px rgba(0,0,0,0.18)" }}
+      className={`min-w-0 rounded-[14px] bg-surface p-4 text-ink-2 shadow-(--shadow-lift) sm:p-5 ${className}`}
     >
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-[14px] font-medium tracking-[-0.01em] text-neutral-900 dark:text-neutral-100">{title}</h3>
+          <h3 className="text-sm font-medium text-ink">{title}</h3>
           {description && <p className={`mt-0.5 text-[12.5px] ${muted}`}>{description}</p>}
         </div>
         {actions}
@@ -173,7 +172,7 @@ export function SegmentedControl<T extends string>({
 }) {
   const id = useId();
   return (
-    <div role="radiogroup" aria-label={label} className="relative inline-flex shrink-0 rounded-full bg-black/[0.04] p-0.5 dark:bg-white/[0.05]">
+    <div role="radiogroup" aria-label={label} className="relative inline-flex shrink-0 tray rounded-full p-0.5">
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -184,13 +183,13 @@ export function SegmentedControl<T extends string>({
             aria-checked={on}
             onClick={() => onChange(o.value)}
             className={`relative z-10 h-8 rounded-full px-3.5 text-[12px] font-medium transition-colors duration-150 [-webkit-tap-highlight-color:transparent] sm:h-7 sm:px-3 ${focus} ${
-              on ? "text-neutral-900 dark:text-white" : "text-neutral-500"
+              on ? "text-ink" : "text-muted-foreground"
             }`}
           >
             {on && (
               <motion.span
                 layoutId={id}
-                className="absolute inset-0 -z-10 rounded-full bg-white shadow-sm dark:bg-neutral-800"
+                className="absolute inset-0 -z-10 rounded-full bg-surface shadow-(--shadow-card)"
                 transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
               />
             )}

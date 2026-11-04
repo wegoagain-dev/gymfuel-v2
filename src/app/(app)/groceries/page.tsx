@@ -17,31 +17,37 @@ export default async function GroceriesPage({ searchParams }: PageProps<"/grocer
   const [user, tz, params] = await Promise.all([requireUser(), getTimeZone(), searchParams])
   const [pantry, groceries] = await Promise.all([getPantry(user), getGroceries(user)])
   const tab = params.tab === "shopping" ? "shopping" : "kitchen"
+  const openCount = groceries.filter((item) => !item.checked).length
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 md:gap-8">
       <PageHeader title="Groceries" description="Keep track of what's in your kitchen, turn it into meals, and plan the next shop." />
-      <Tabs defaultValue={tab} className="gap-6">
-        <TabsList className="h-10">
-          <TabsTrigger value="kitchen" className="px-4"><PackageOpen /> Kitchen &amp; AI</TabsTrigger>
-          <TabsTrigger value="shopping" className="px-4">
+
+      {/* One screen on a phone (tabs); two calm columns from lg. */}
+      <Tabs defaultValue={tab} className="gap-5">
+        <TabsList className="h-auto! w-full p-1 sm:w-fit lg:hidden">
+          <TabsTrigger value="kitchen" className="h-10! px-4"><PackageOpen /> Kitchen &amp; AI</TabsTrigger>
+          <TabsTrigger value="shopping" className="h-10! px-4">
             <ShoppingBasket /> Shopping list
-            <span className="tabular ml-1 rounded-full bg-muted px-1.5 text-xs">{groceries.filter((item) => !item.checked).length}</span>
+            <span className="rx ml-0.5 rounded-full bg-paper-3 px-1.5 py-0.5 text-xs text-ink-2">{openCount}</span>
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="kitchen">
-          <KitchenPanel
-            ingredients={pantry.map(({ id, name }) => ({ id, name }))}
-            defaultGoal={user.preferences.fitnessGoal ?? "maintain"}
-            aiMode={aiMode()}
-          />
-        </TabsContent>
-        <TabsContent value="shopping">
-          <ShoppingList
-            today={dayKey(tz, new Date())}
-            items={groceries.map(({ id, name, quantity, unit, category, expirationDate, checked }) => ({ id, name, quantity, unit, category, expirationDate, checked }))}
-          />
-        </TabsContent>
+
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start lg:gap-8">
+          <TabsContent value="kitchen" forceMount className="hidden min-w-0 data-[state=active]:block lg:block">
+            <KitchenPanel
+              ingredients={pantry.map(({ id, name }) => ({ id, name }))}
+              defaultGoal={user.preferences.fitnessGoal ?? "maintain"}
+              aiMode={aiMode()}
+            />
+          </TabsContent>
+          <TabsContent value="shopping" forceMount className="hidden min-w-0 data-[state=active]:block lg:block">
+            <ShoppingList
+              today={dayKey(tz, new Date())}
+              items={groceries.map(({ id, name, quantity, unit, category, expirationDate, checked }) => ({ id, name, quantity, unit, category, expirationDate, checked }))}
+            />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   )

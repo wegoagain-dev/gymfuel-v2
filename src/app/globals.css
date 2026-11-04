@@ -1,15 +1,40 @@
+/* Hallmark · shape: Stage (/), app screen (/today, /meals, /groceries, /recipes, /profile, /coach) · genre: modern-minimal · theme: Dose (by request) · redesign: full
+ * hero: Stage (/, /login, /register) · nav: wordmark bar over a plastic tab dock (app), wordmark bar (/) · footer: one line · imagery: the product's own screens (/), photographs 1 (/login, /register) · signature: the day as a pill-organiser tray, each macro a plastic compartment filled to its target, each meal a pharmacy label with its DM Mono time · dose: white, night in dark mode
+ * job: sign up · axes: light/grotesk-sans/chromatic-green · posture: committed · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S4 R4 V4 · weakest: S, a nutrition tracker drifts toward the generic ring-and-card dashboard; the Dose organiser carries it instead: macros as translucent compartments filling up, meals as labels with exact times */
+/* Hallmark · answered F16 · selection, caret, scrollbar and focus ring come from base.css and the tokens in both modes */
+/* Hallmark · waive 77 · a band of one line and an action, once on the page · the closing ink band is the Dose statement band, one sentence and the Open GymFuel action */
+/* Hallmark · dismissed 77 · the landing keeps the four sections it had (hero, features, closing band, footer); a redesign adds no content the product did not have */
+/* Hallmark · dismissed F18 · "field-label" is a shadcn data-slot on form labels, not a Hallmark picture slot */
+/* Hallmark · reworded "640 kcal · 46 g protein · 48 g carbs" and the 08:10, 13:05, 19:20 timeline · they were a drawn mock of the product (84); real captures of Today and the Lens review replace them */
+/* Hallmark · dropped #week-title · the client page's week heading became the grouped day headings of the meal register */
+/* Hallmark · waive 26b · screen files render shared ui primitives, not raw controls · the GymFuel button, toggle and input primitives carry the active and disabled states, plus the base :disabled rule */
+/* Hallmark · dropped the window-light drift · a 90s ambient loop would need a pause control on a screen people open ten times a day; the light stays still */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./tokens.css";
+@import "./base.css" layer(base);
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-outlier);
+  --font-heading: var(--font-display);
+  --color-signal: var(--color-accent);
+  --color-signal-deep: var(--color-accent-deep);
+  --color-signal-soft: var(--color-accent-soft);
+  --color-signal-ink: var(--color-accent-ink);
+  --color-surface: var(--color-surface);
+  --color-paper: var(--color-paper);
+  --color-paper-2: var(--color-paper-2);
+  --color-paper-3: var(--color-paper-3);
+  --color-ink: var(--color-ink);
+  --color-ink-2: var(--color-ink-2);
+  --color-rule: var(--color-rule);
   --color-kcal: var(--kcal);
   --color-protein: var(--protein);
   --color-carbs: var(--carbs);
@@ -45,94 +70,56 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: var(--radius-input);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: var(--radius-card);
+  --radius-3xl: 20px;
+  --radius-4xl: var(--radius-pill);
 }
 
+/* shadcn's names, pointed at the Dose sheet. Primary is the one pharmacy green; shadcn's "accent" is its
+   hover surface, a step of mint paper. Both modes follow the tokens, which re-derive under .dark. */
 :root {
-  --background: oklch(0.985 0.003 106);
-  --foreground: oklch(0.2 0.012 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.012 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.012 260);
-  --primary: oklch(0.56 0.16 150);
-  --primary-foreground: oklch(0.99 0.01 150);
-  --secondary: oklch(0.955 0.006 106);
-  --secondary-foreground: oklch(0.25 0.012 260);
-  --muted: oklch(0.955 0.006 106);
-  --muted-foreground: oklch(0.5 0.012 260);
-  --accent: oklch(0.95 0.03 150);
-  --accent-foreground: oklch(0.3 0.08 150);
-  --destructive: oklch(0.577 0.215 27.3);
-  --border: oklch(0.91 0.006 106);
-  --input: oklch(0.89 0.006 106);
-  --ring: oklch(0.56 0.16 150);
-  --kcal: oklch(0.7 0.17 50);
-  --protein: oklch(0.6 0.15 160);
-  --carbs: oklch(0.66 0.13 240);
-  --fat: oklch(0.68 0.15 345);
-  --success: oklch(0.6 0.15 155);
-  --warning: oklch(0.75 0.15 75);
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-accent);
+  --primary-foreground: var(--color-accent-ink);
+  --secondary: var(--color-paper-3);
+  --secondary-foreground: var(--color-ink-2);
+  --muted: var(--color-paper-2);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-paper-3);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-error);
+  --border: var(--color-rule);
+  --input: var(--color-muted);
+  --ring: var(--color-focus);
+  --success: var(--color-success);
+  --warning: var(--macro-kcal);
+  --kcal: var(--macro-kcal);
+  --protein: var(--macro-protein);
+  --carbs: var(--macro-carbs);
+  --fat: var(--macro-fat);
   --chart-1: var(--protein);
   --chart-2: var(--carbs);
   --chart-3: var(--fat);
   --chart-4: var(--kcal);
-  --chart-5: oklch(0.55 0.02 260);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.98 0.003 106);
-  --sidebar-foreground: oklch(0.2 0.012 260);
-  --sidebar-primary: oklch(0.56 0.16 150);
-  --sidebar-primary-foreground: oklch(0.99 0.01 150);
-  --sidebar-accent: oklch(0.95 0.006 106);
-  --sidebar-accent-foreground: oklch(0.2 0.012 260);
-  --sidebar-border: oklch(0.91 0.006 106);
-  --sidebar-ring: oklch(0.56 0.16 150);
-}
-
-.dark {
-  --background: oklch(0.155 0.008 260);
-  --foreground: oklch(0.96 0.004 106);
-  --card: oklch(0.195 0.01 260);
-  --card-foreground: oklch(0.96 0.004 106);
-  --popover: oklch(0.21 0.01 260);
-  --popover-foreground: oklch(0.96 0.004 106);
-  --primary: oklch(0.8 0.18 145);
-  --primary-foreground: oklch(0.2 0.05 150);
-  --secondary: oklch(0.25 0.01 260);
-  --secondary-foreground: oklch(0.96 0.004 106);
-  --muted: oklch(0.24 0.01 260);
-  --muted-foreground: oklch(0.7 0.01 260);
-  --accent: oklch(0.28 0.04 150);
-  --accent-foreground: oklch(0.9 0.08 145);
-  --destructive: oklch(0.7 0.19 22);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.8 0.18 145);
-  --kcal: oklch(0.78 0.16 55);
-  --protein: oklch(0.78 0.15 160);
-  --carbs: oklch(0.76 0.12 240);
-  --fat: oklch(0.76 0.14 345);
-  --success: oklch(0.78 0.16 150);
-  --warning: oklch(0.82 0.15 80);
-  --chart-1: var(--protein);
-  --chart-2: var(--carbs);
-  --chart-3: var(--fat);
-  --chart-4: var(--kcal);
-  --chart-5: oklch(0.6 0.02 260);
-  --sidebar: oklch(0.18 0.01 260);
-  --sidebar-foreground: oklch(0.96 0.004 106);
-  --sidebar-primary: oklch(0.8 0.18 145);
-  --sidebar-primary-foreground: oklch(0.2 0.05 150);
-  --sidebar-accent: oklch(0.25 0.01 260);
-  --sidebar-accent-foreground: oklch(0.96 0.004 106);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.8 0.18 145);
+  --chart-5: var(--color-muted);
+  --radius: var(--radius-input);
+  --sidebar: var(--color-paper-2);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-accent);
+  --sidebar-primary-foreground: var(--color-accent-ink);
+  --sidebar-accent: var(--color-paper-3);
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: var(--color-rule);
+  --sidebar-ring: var(--color-focus);
 }
 
 /* Tokens the EasyUI components expect, mapped onto the shadcn theme. */
@@ -145,16 +132,179 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    background-image: var(--grain);
+  }
+  html {
+    @apply font-sans;
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-  html {
-    @apply font-sans;
+  :disabled, [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  input:focus-visible, textarea:focus-visible, [data-slot="select-trigger"]:focus-visible {
+    outline-offset: 0;
+  }
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+  /* iOS Safari draws date and time inputs natively: it ignores the set height, grows the text and
+     won't shrink below its own width, so the field bulges out of its grid cell. Flatten it back
+     into a plain 40px field. */
+  input[type="date"], input[type="time"], input[type="datetime-local"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.25;
+    text-align: left;
+  }
+  input::-webkit-date-and-time-value {
+    margin: 0;
+    min-height: 1.25em;
+    text-align: left;
+  }
+  input::-webkit-datetime-edit {
+    padding: 0;
+  }
+}
+
+@layer components {
+  /* Translucent plastic: a pale tint with a glint on top, a deeper shade at the foot and its colour pooled below. */
+  .plastic {
+    --t: var(--p-thu);
+    position: relative;
+    border-radius: var(--radius-card);
+    background:
+      linear-gradient(color-mix(in oklab, var(--glint) 32%, transparent), transparent 18%),
+      color-mix(in oklab, var(--t) 62%, transparent);
+    box-shadow:
+      inset 0 1.5px 0 var(--glint),
+      inset 0 -24px 36px -28px color-mix(in oklab, var(--t) 45%, var(--color-ink)),
+      0 18px 28px -22px color-mix(in oklab, var(--t) 90%, var(--color-ink));
+  }
+  .plastic--mon { --t: var(--p-mon); }
+  .plastic--tue { --t: var(--p-tue); }
+  .plastic--wed { --t: var(--p-wed); }
+  .plastic--thu { --t: var(--p-thu); }
+  .plastic--fri { --t: var(--p-fri); }
+  .plastic--sat { --t: var(--p-sat); }
+  .plastic--sun { --t: var(--p-sun); }
+
+  /* A sunken tray the controls and lists sit in. */
+  .tray {
+    border-radius: var(--radius-card);
+    background: var(--color-paper-2);
+    box-shadow: var(--shadow-tray);
+  }
+
+  /* A white surface lifted off the paper. */
+  .surface {
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* A pharmacy label: grained white paper, DM Mono, a tear-off stub on a dashed rule. */
+  .rx-label {
+    position: relative;
+    border-radius: var(--radius-input);
+    background: var(--grain), var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+  .rx-stub {
+    border-top: 1px dashed var(--color-rule);
+  }
+
+  /* The confirmation stamp: double-ringed green, turned two degrees. */
+  .rx-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-3xs) var(--space-xs);
+    border: 1.5px solid var(--color-accent);
+    outline: 1.5px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+    color: var(--color-accent-deep);
+    font-family: var(--font-outlier);
+    font-size: var(--text-xs);
+    line-height: 1.3;
+    transform: rotate(-2deg);
+  }
+  .dark .rx-stamp {
+    color: var(--color-accent);
+  }
+
+  /* Times, doses and measured figures. */
+  .rx {
+    font-family: var(--font-outlier);
+    font-variant-numeric: tabular-nums;
+  }
+  .figure {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--tracking-display);
+    font-variant-numeric: tabular-nums lining-nums;
+    line-height: 1;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  /* Moulded controls: a glint on top, a rim below, a press that sinks. */
+  .moulded {
+    box-shadow: inset 0 1px 0 var(--glint), 0 0 0 1px var(--color-rule), 0 3px 0 var(--color-rule);
+  }
+  .moulded-primary {
+    background: linear-gradient(var(--color-accent), var(--color-accent-deep));
+    box-shadow: inset 0 1px 0 color-mix(in oklab, var(--glint) 40%, transparent), 0 0 0 1px var(--color-accent-deep), 0 3px 0 var(--color-accent-deep);
+  }
+  .moulded:active:not(:disabled), .moulded-primary:active:not(:disabled) {
+    transform: translateY(2px);
+  }
+
+  /* The window light on the landing hero: blurred panes of daylight, still. */
+  .window-light {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .window-light span {
+    position: absolute;
+    width: 22%;
+    height: 70%;
+    background: var(--light);
+    filter: blur(28px);
+    opacity: 0.85;
+    transform: skewX(-18deg);
+  }
+  .dark .window-light {
+    display: none;
+  }
+
+  /* The app's tab dock on a phone: a plastic tray along the bottom edge. */
+  .dock {
+    background:
+      linear-gradient(color-mix(in oklab, var(--glint) 40%, transparent), transparent 30%),
+      var(--color-surface);
+    box-shadow: var(--shadow-dock);
   }
 }
 
@@ -163,6 +313,9 @@
     font-variant-numeric: tabular-nums;
   }
   .pb-safe {
-    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+    padding-bottom: max(env(safe-area-inset-bottom), var(--space-sm));
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
   }
 }

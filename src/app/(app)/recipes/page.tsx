@@ -17,7 +17,7 @@ export default async function RecipesPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Recipes" description="Your go-to meals and the AI ideas you saved.">
-        <Button asChild>
+        <Button asChild className="focus-visible:outline-offset-2">
           <Link href="/recipes/new"><Plus data-icon="inline-start" /> Add recipe</Link>
         </Button>
       </PageHeader>

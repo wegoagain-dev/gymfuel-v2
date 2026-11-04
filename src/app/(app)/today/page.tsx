@@ -1,13 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { PartyPopper, Target } from "lucide-react"
+import { PartyPopper } from "lucide-react"
 import { PageHeader } from "@/components/app/page-header"
-import { MacroDonut } from "@/components/today/macro-donut"
+import { MacroOrganiser } from "@/components/today/macro-organiser"
 import { TodayBoard } from "@/components/today/today-board"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AnimatedNumber } from "@/components/ui/animated-number"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { aiMode } from "@/lib/ai"
 import { requireUser } from "@/lib/auth/dal"
 import { getMealLogsBetween } from "@/lib/data"
@@ -37,38 +34,21 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const firstName = (user.fullName || user.username).split(" ")[0]
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 md:gap-8">
       <PageHeader eyebrow={formatDay(tz, new Date())} title={`Hi, ${firstName}`} />
 
       {params.welcome && (
-        <Alert>
+        <Alert className="border-transparent bg-signal-soft/50">
           <PartyPopper />
           <AlertTitle>Welcome to GymFuel</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="text-ink-2">
             Start by setting your daily targets, then log your first meal with Lens.{" "}
             <Link href="/profile" className="font-medium text-foreground underline underline-offset-4">Set targets</Link>
           </AlertDescription>
         </Alert>
       )}
 
-      <section aria-label="Daily progress" className="grid gap-4 rounded-2xl border bg-card p-5 md:grid-cols-[1fr_1fr_auto] md:p-6">
-        <ProgressStat label="Calories" value={totals.calories} target={dailyCalorieTarget} unit="kcal" indicator="bg-kcal" />
-        <ProgressStat label="Protein" value={totals.protein} target={dailyProteinTarget} unit="g" indicator="bg-protein" />
-        <div className="flex items-center justify-center md:border-l md:pl-6">
-          {totals.calories > 0 ? (
-            <MacroDonut protein={totals.protein} carbs={totals.carbs} fat={totals.fat} />
-          ) : (
-            <p className="max-w-40 text-center text-sm text-muted-foreground">Your macro split appears after the first meal.</p>
-          )}
-        </div>
-        {(!dailyCalorieTarget || !dailyProteinTarget) && (
-          <Button variant="outline" className="md:col-span-3 md:justify-self-start" asChild>
-            <Link href="/profile">
-              <Target data-icon="inline-start" /> Set your targets
-            </Link>
-          </Button>
-        )}
-      </section>
+      <MacroOrganiser totals={totals} calorieTarget={dailyCalorieTarget} proteinTarget={dailyProteinTarget} />
 
       <TodayBoard
         aiMode={aiMode()}
@@ -85,25 +65,6 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
           sourceRecipeId: log.sourceRecipeId,
         }))}
       />
-    </div>
-  )
-}
-
-function ProgressStat({ label, value, target, unit, indicator }: { label: string; value: number; target?: number; unit: string; indicator: string }) {
-  const percent = target ? Math.min((value / target) * 100, 100) : 0
-  return (
-    <div className="flex flex-col justify-between gap-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground">
-          {!target ? "No target set" : value <= target ? `${Math.round(target - value).toLocaleString("en-GB")} ${unit} left` : `${Math.round(value - target).toLocaleString("en-GB")} ${unit} over`}
-        </p>
-      </div>
-      <div className="flex items-baseline gap-1.5">
-        <AnimatedNumber value={Math.round(value)} useGrouping className="text-4xl font-semibold tracking-tight" />
-        <span className="text-sm text-muted-foreground">{target ? `/ ${Math.round(target).toLocaleString("en-GB")} ${unit}` : unit}</span>
-      </div>
-      <Progress value={percent} aria-label={`${label} progress`} className="h-2" indicatorClassName={indicator} />
     </div>
   )
 }

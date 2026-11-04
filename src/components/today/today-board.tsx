@@ -30,57 +30,60 @@ export function TodayBoard({ meals, defaultMealType, aiMode }: { meals: TodayMea
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2">
-        <LensCard aiMode={aiMode} onDraft={(analysis) =>
-          setEditor({
-            draft: { title: analysis.title, foods: analysis.foods, nutrition: analysis.nutrition, eatenAt: new Date().toISOString(), favorite: false },
-            mode: { kind: "create" },
-            assumptions: analysis.assumptions,
-            estimate: true,
-          })
-        } />
-        <SuggestCard defaultMealType={defaultMealType} aiMode={aiMode} onLog={(draft) => setEditor({ draft, mode: { kind: "create" }, estimate: true })} />
-      </div>
-
-      <section aria-labelledby="todays-meals" className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 id="todays-meals" className="text-lg font-semibold">Today&apos;s meals</h2>
-          <Badge variant="secondary" className="tabular">{Math.round(totalProtein)} g protein</Badge>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
+        <div className="flex flex-col gap-4 lg:order-2">
+          <LensCard aiMode={aiMode} onDraft={(analysis) =>
+            setEditor({
+              draft: { title: analysis.title, foods: analysis.foods, nutrition: analysis.nutrition, eatenAt: new Date().toISOString(), favorite: false },
+              mode: { kind: "create" },
+              assumptions: analysis.assumptions,
+              estimate: true,
+            })
+          } />
+          <SuggestCard defaultMealType={defaultMealType} aiMode={aiMode} onLog={(draft) => setEditor({ draft, mode: { kind: "create" }, estimate: true })} />
         </div>
-        {meals.length ? (
-          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card">
-            {meals.map((meal) => (
-              <li key={meal.id} className="flex items-center gap-4 px-4 py-3.5">
-                <span className="tabular w-11 shrink-0 text-sm text-muted-foreground">{meal.time}</span>
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  {meal.favorite ? <Heart className="size-4 fill-fat text-fat" /> : <Utensils className="size-4" />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{meal.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">{meal.foods.map((food) => food.name).join(" · ")}</p>
-                </div>
-                <MacroLine calories={meal.nutrition.calories} protein={meal.nutrition.protein} className="hidden sm:inline-flex" />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Edit ${meal.title}`}
-                  onClick={() => setEditor({ draft: meal, mode: { kind: "update", id: meal.id }, heading: "Edit meal", saveLabel: "Save changes" })}
-                >
-                  <Pencil />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Empty className="rounded-2xl border border-dashed">
-            <EmptyHeader>
-              <EmptyMedia variant="icon"><Utensils /></EmptyMedia>
-              <EmptyTitle>Nothing logged yet today</EmptyTitle>
-              <EmptyDescription>Snap a photo with Lens or let AI pick your next meal.</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </section>
+
+        <section aria-labelledby="todays-meals" className="flex flex-col gap-4 lg:order-1">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="todays-meals" className="display text-2xl">Today&apos;s meals</h2>
+            <Badge variant="secondary" className="rx">{Math.round(totalProtein)}&nbsp;g protein</Badge>
+          </div>
+          {meals.length ? (
+            <ol className="flex flex-col gap-3">
+              {meals.map((meal) => (
+                <li key={meal.id} className="rx-label flex min-w-0">
+                  <div className="rx-stub flex w-[4.75rem] shrink-0 flex-col justify-between gap-3 border-t-0 border-r border-dashed p-3.5 sm:w-24 sm:p-4">
+                    <time dateTime={meal.eatenAt} className="rx text-lg font-medium text-ink sm:text-xl">{meal.time}</time>
+                    {meal.favorite && <Heart className="size-4 fill-current text-signal-deep dark:text-signal" aria-label="Favourite" />}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 p-3.5 sm:p-4">
+                    <p className="truncate font-medium">{meal.title}</p>
+                    <p className="truncate text-sm text-muted-foreground">{meal.foods.map((food) => food.name).join(", ")}</p>
+                    <MacroLine calories={meal.nutrition.calories} protein={meal.nutrition.protein} className="mt-1.5 text-ink-2" />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="m-2 self-start"
+                    aria-label={`Edit ${meal.title}`}
+                    onClick={() => setEditor({ draft: meal, mode: { kind: "update", id: meal.id }, heading: "Edit meal", saveLabel: "Save changes" })}
+                  >
+                    <Pencil />
+                  </Button>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <Empty className="tray">
+              <EmptyHeader>
+                <EmptyMedia variant="icon"><Utensils /></EmptyMedia>
+                <EmptyTitle>Nothing logged yet today</EmptyTitle>
+                <EmptyDescription>Snap a photo with Lens or let AI pick your next meal.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </section>
+      </div>
 
       <MealEditorDialog state={editor} onClose={() => setEditor(null)} />
     </>
@@ -112,15 +115,12 @@ function LensCard({ onDraft, aiMode }: { onDraft: (analysis: MealAnalysis) => vo
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border bg-card p-5 md:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-          <Camera className="size-5" />
-        </span>
-        <div>
-          <h2 className="text-lg font-semibold">Log with Lens</h2>
-          <p className="text-sm text-muted-foreground">Photograph your plate. You review the estimate before it counts.</p>
-        </div>
+    <div className="tray flex flex-col gap-5 p-5">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="display flex items-center gap-2 text-xl">
+          <Camera className="size-5 text-signal-deep dark:text-signal" aria-hidden="true" /> Log with Lens
+        </h2>
+        <p className="text-sm text-ink-2">Photograph your plate. You review the estimate before it counts.</p>
       </div>
       {error && (
         <Alert variant="destructive">
@@ -144,13 +144,13 @@ function LensCard({ onDraft, aiMode }: { onDraft: (analysis: MealAnalysis) => vo
             if (file) void analyse(file)
           }}
         />
-        <Button size="lg" className="h-11" onClick={() => fileInput.current?.click()} disabled={pending}>
+        <Button size="lg" onClick={() => fileInput.current?.click()} disabled={pending}>
           {pending ? <Spinner data-icon="inline-start" /> : <ImagePlus data-icon="inline-start" />}
           {pending ? "Analysing your meal…" : "Take or choose a photo"}
         </Button>
         {aiMode === "demo" ? (
           <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>Demo AI — estimates come from your notes.</span>
+            <span>Demo AI: estimates come from your notes.</span>
             <Button variant="link" size="xs" className="h-auto p-0" disabled={pending || !context.trim()} onClick={() => analyse()}>
               Use notes only
             </Button>
@@ -181,20 +181,15 @@ function SuggestCard({ defaultMealType, aiMode, onLog }: { defaultMealType: Meal
     })
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border bg-card p-5 md:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-          <WandSparkles className="size-5" />
-        </span>
-        <div>
-          <h2 className="text-lg font-semibold">Pick a meal for me</h2>
-          <p className="text-sm text-muted-foreground">One practical idea from your preferences and what&apos;s left of today&apos;s targets.</p>
-        </div>
+    <div className="surface flex flex-col gap-4 p-5">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="display flex items-center gap-2 text-xl">
+          <WandSparkles className="size-5 text-signal-deep dark:text-signal" aria-hidden="true" /> Pick a meal for me
+        </h2>
+        <p className="text-sm text-ink-2">One practical idea from your preferences and what&apos;s left of today&apos;s targets.</p>
       </div>
       <Button
-        size="lg"
         variant="outline"
-        className="mt-auto h-11"
         onClick={() => {
           setOpen(true)
           if (!recipe) generate()
@@ -211,7 +206,7 @@ function SuggestCard({ defaultMealType, aiMode, onLog }: { defaultMealType: Meal
               Based on your profile and remaining targets{aiMode === "demo" ? " (demo AI)" : ""}.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3">
             <Field>
               <FieldLabel>Meal</FieldLabel>
               <Select value={mealType} onValueChange={(value) => setMealType(value as MealType)}>
@@ -237,7 +232,7 @@ function SuggestCard({ defaultMealType, aiMode, onLog }: { defaultMealType: Meal
             </Alert>
           )}
           {pending ? (
-            <div className="flex flex-col gap-3 rounded-2xl border p-5">
+            <div className="tray flex flex-col gap-3 p-5">
               <Skeleton className="h-5 w-24" />
               <Skeleton className="h-6 w-3/4" />
               <Skeleton className="h-12 w-full" />
