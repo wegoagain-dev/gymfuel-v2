@@ -206,7 +206,7 @@ function SuggestCard({ defaultMealType, aiMode, onLog }: { defaultMealType: Meal
               Based on your profile and remaining targets{aiMode === "demo" ? " (demo AI)" : ""}.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3">
             <Field>
               <FieldLabel>Meal</FieldLabel>
               <Select value={mealType} onValueChange={(value) => setMealType(value as MealType)}>

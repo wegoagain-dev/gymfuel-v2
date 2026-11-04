@@ -219,7 +219,7 @@ function GroceryForm({ item, onDone }: { item: Item | null; onDone: () => void }
             <Input id="grocery-name" name="name" required maxLength={120} placeholder="e.g. Greek yoghurt" defaultValue={item?.name} aria-invalid={Boolean(errors.name) || undefined} />
             <FieldError>{errors.name}</FieldError>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3">
             <Field data-invalid={Boolean(errors.quantity) || undefined}>
               <FieldLabel htmlFor="grocery-quantity">Quantity</FieldLabel>
               <Input id="grocery-quantity" name="quantity" type="number" inputMode="decimal" min="0.01" step="any" required defaultValue={item?.quantity ?? 1} />
@@ -233,7 +233,7 @@ function GroceryForm({ item, onDone }: { item: Item | null; onDone: () => void }
               </Select>
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3">
             <Field>
               <FieldLabel>Category</FieldLabel>
               <Select name="category" defaultValue={item?.category ?? "Other"}>

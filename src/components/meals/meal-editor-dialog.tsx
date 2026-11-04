@@ -171,7 +171,7 @@ export function MealEditorDialog({ state, onClose }: { state: MealEditorState; o
                 <FieldLabel>Macros</FieldLabel>
                 <p className="text-xs text-muted-foreground">Adjust the numbers and the estimate above follows.</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 sm:grid-cols-[repeat(4,minmax(0,1fr))]">
                 {MACRO_FIELDS.map(([key, label, unit]) => (
                   <Field key={key}>
                     <FieldLabel htmlFor={`macro-${key}`} className="text-xs text-muted-foreground">{label}</FieldLabel>

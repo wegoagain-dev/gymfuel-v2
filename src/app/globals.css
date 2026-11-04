@@ -158,6 +158,26 @@
     color: var(--color-muted);
     opacity: 1;
   }
+  /* iOS Safari draws date and time inputs natively: it ignores the set height, grows the text and
+     won't shrink below its own width, so the field bulges out of its grid cell. Flatten it back
+     into a plain 40px field. */
+  input[type="date"], input[type="time"], input[type="datetime-local"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.25;
+    text-align: left;
+  }
+  input::-webkit-date-and-time-value {
+    margin: 0;
+    min-height: 1.25em;
+    text-align: left;
+  }
+  input::-webkit-datetime-edit {
+    padding: 0;
+  }
 }
 
 @layer components {
